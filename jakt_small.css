@@ -1,0 +1,32 @@
+html,body { 
+margin:0px; 
+height:100%; /* this is the key! */ 
+}   
+
+/* default is canvas top left, info top right
+   but this is changed for phones
+ */ 
+  #mapCanvas {
+    width: 95%;
+    height: 80%;
+    float:right;
+    border: 1px solid #666;
+    padding: 2px;
+  }
+  #infoPanel {
+    width: 95%;
+    padding: 1em;
+    float:right;
+    padding-bottom: 2em;
+    /*
+    border: 1px solid #666;
+    */
+  }
+  #footer {
+    clear:both;
+    border-top: 1px solid #666; 
+    /*
+    border: 1px solid #666; 
+    */
+    padding: 1em 
+  }
