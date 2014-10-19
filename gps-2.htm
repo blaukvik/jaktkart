@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>GPS pos</title>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+
+<script type="text/javascript"
+    src="http://maps.google.com/maps/api/js?sensor=false">
+</script>
+
+<script type="text/javascript" src="jaktkart.js"></script>
+
+<link rel="stylesheet" media="screen and (min-device-width: 801px)" type="text/css" href="jakt.css" />
+<LINK rel="stylesheet" media="screen and (max-device-width: 800px)" type="text/css" href="jakt_small.css">
+
+<script type="text/javascript">
+
+var circleg;
+var count = 0;
+
+function initialize_gps() {
+
+  //detectBrowser();
+  
+  var default_pos = new google.maps.LatLng(59.10, 11.0);
+    
+  var map = new google.maps.Map(document.getElementById("mapCanvas"),
+                {
+                zoom: 14,
+                center: default_pos,
+                scaleControl : true,
+                navigationControlOptions: {
+                  style: google.maps.NavigationControlStyle.DEFAULT  // DEFAULT, SMALL, ZOOM_PAN
+                },
+                mapTypeControlOptions: {
+                  mapTypeIds: ['kartdata2', 'sjo_hovedkart2', 'topo2', 'topo2graatone', 'toporaster2', 'europa',google.maps.MapTypeId.SATELLITE],
+                  style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+                  }
+                });
+
+  map.mapTypes.set('sjo_hovedkart2',new StatkartMapType("Sjo hovedkart", "sjo_hovedkart2"));
+  map.mapTypes.set('kartdata2',new StatkartMapType("Kartdata 2", "kartdata2"));
+  map.mapTypes.set('topo2',new StatkartMapType("Topografisk", "topo2"));
+  map.mapTypes.set('topo2graatone',new StatkartMapType("Graatone", "topo2graatone"));
+  map.mapTypes.set('toporaster2',new StatkartMapType("Toporaster", "toporaster2"));
+  map.mapTypes.set('europa',new StatkartMapType("Europa", "europa"));
+
+  // default
+  map.setMapTypeId('topo2');
+
+  
+  // Try W3C Geolocation 
+  if(navigator.geolocation) 
+  {
+    browserSupportFlag = true;
+    
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        document.getElementById('gpsStatus').innerHTML = "first pos OK";
+        initialLocation = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+        map.setCenter(initialLocation);             
+        own_marker = new google.maps.Marker({
+                          position: initialLocation,
+                          map:map,
+                          icon: 'blue.png'
+                          }
+                        ); 
+        var acc_radius = position.coords.accuracy * 5;
+        circleg = new google.maps.Circle({center:initialLocation,
+                                         radius: acc_radius,
+                                         map:map,
+                                         strokeColor: 'blue'});                        
+        // start watching      
+        var updateLocation = navigator.geolocation.watchPosition(
+
+           function(position) {
+              count = count +1;
+              try
+              {
+              
+  document.getElementById('gpsStatus').innerHTML = "watch pos start " + count;
+  document.getElementById('gpsPos').innerHTML = "" + position.coords.latitude.toString().slice(0,8) + " / " +position.coords.longitude.toString().slice(0,8);  
+  document.getElementById('gpsAccu').innerHTML = position.coords.accuracy;  
+  
+/*
+  if (position.coords.speed)      
+     document.getElementById('gpsSpeed').innerHTML = "" + position.coords.speed + " m/s";  
+  else
+     document.getElementById('gpsSpeed').innerHTML = "Ikke funnet";  
+*/
+    
+    
+  var now = new Date().getTime();
+  var posTime = new Date(position.timestamp);
+  
+  document.getElementById('gpsTime').innerHTML = ("0" + posTime.getHours()).slice(-2) +":" + ("0" + posTime.getMinutes()).slice(-2) +":" + ("0" + posTime.getSeconds()).slice(-2);
+  //document.getElementById('gpsTime').innerHTML = posTime;
+  
+    
+  /*
+     if (position.timestamp )
+     // safari
+         epoch i 1982 ?
+  */
+  var age = now - position.timestamp;
+
+  // safari har feil her..
+  document.getElementById('gpsAge').innerHTML = age/1000 + "s";
+
+
+  // tegn ny pos
+            var newpos = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+            own_marker.setPosition(newpos);
+
+            var zoom = map.getZoom();
+            var meterPerCm = 12.5 * 2^(17-zoom);
+            var desRadiusMeter = position.coords.accuracy  * meterPerCm/60;
+            
+            
+            circleg.setCenter(newpos);
+            circleg.setRadius(desRadiusMeter);
+                        
+            if (position.coords.accuracy > 100.0){
+              circleg.setOptions({strokeColor:'#FF0000'});
+            }
+            else if (position.coords.accuracy > 50.0){
+              circleg.setOptions({strokeColor:'yellow'});
+            }
+            else if (position.coords.accuracy > 25.0){
+              circleg.setOptions({strokeColor:'#00AA00'});
+            }
+            else {//if (position.coords.accuracy > 0){
+              circleg.setOptions({strokeColor:'#00FF00'});
+            }
+
+            document.getElementById('gpsStatus').innerHTML = "watch pos OK " + count;
+
+            } // try
+            catch(err)
+            {
+            document.getElementById('gpsStatus').innerHTML = "watch pos err:" + err;            
+            }
+            
+          }, 
+          function () { 
+            document.getElementById('gpsStatus').innerHTML = "watch pos failed";
+            //
+          },
+          {enableHighAccuracy:true, maximumAge:3000, timeout:10000});
+          
+        //navigator.geolocation.clearWatch(updateLocation);  
+      }, 
+      function(error) {
+      document.getElementById('gpsStatus').innerHTML = "first pos failed";
+
+        alert(error.message);
+        //handleNoGeolocation(browserSupportFlag);
+      },
+        {enableHighAccuracy:true, maximumAge:3000, timeout:10000});
+      
+      
+  } else {
+    browserSupportFlag = false;
+    document.getElementById('gpsStatus').innerHTML = "Ikke st&oslash;ttet";
+    //handleNoGeolocation(browserSupportFlag);
+  }    
+
+  
+}
+
+// Onload handler to fire off the app.
+google.maps.event.addDomListener(window, 'load', initialize_gps);  
+</script>
+
+
+</head>
+
+
+<body> 
+  <!-- the canvas is placed top left on PC, or plain top on phone -->
+  <div id="mapCanvas"></div> 
+  
+  
+  <!-- the infopanel is placed top right on PC, or below map on phone -->
+  <div id="infoPanel"> 
+    <b>Pos:</b>  <div id="gpsPos" style="display:inline;">POS:</div> 
+  <br>
+    <b>N&oslash;yaktighet:</b>  <div id="gpsAccu" style="display:inline;">ukjent</div> meter
+  <br>
+    <b>Oppdatert:</b>  <div id="gpsTime" style="display:inline;">ikke begynt</div>
+<!--
+    <br>
+    <b>Fart:</b>  <div id="gpsSpeed" style="display:inline;">ukjent</div> m/s
+-->    
+  <br>
+    <b>Status:</b>  <div id="gpsStatus" style="display:inline;">ikke begynt</div>
+  <br>
+    <b>Age:</b>  <div id="gpsAge" style="display:inline;">ikke begynt</div>
+  
+  
+  </div> 
+
+  <!-- the footer is placed below all -->
+  <div id="footer">
+  <a href="http://www.statkart.no">Statens kartverk</a>, <a href="http://www.statkart.no/nor/Land/Fagomrader/Geovekst/">Geovekst</a> og <a href="http://www.statkart.no/?module=Articles;action=Article.publicShow;ID=14194">kommuner</a>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Send rettelser og eller kommentarer til <a href="mailto:bla@morecom.no">B�rd Laukvik</a>
+  </div>
+</body> 
+</html>

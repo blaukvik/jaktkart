@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Grenser sm&aring;viltjakt</title>
+
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript"
+    src="http://maps.google.com/maps/api/js?sensor=false">
+</script>
+
+<link rel="stylesheet" media="screen and (min-device-width: 801px)" type="text/css" href="grenser.css" />
+<LINK rel="stylesheet" media="screen and (max-device-width: 800px)" type="text/css" href="jakt_small.css">
+
+<script type="text/javascript" src="jaktkart_grenser.js"></script>
+
+<script type="text/javascript">
+
+var pos_center 	= new google.maps.LatLng(59.0050, 11.5010);
+var zoom_level = 13;
+var num_poster = 0;
+
+var post_pos = [
+
+];
+
+
+  /* Legg ut grensen */
+  
+var num_grenser=3;
+  
+/*
+
+*/
+var pkt_grense = [
+new google.maps.LatLng(59.021716, 11.443119),
+new google.maps.LatLng(59.021449,	11.445819),
+new google.maps.LatLng(59.020939,	11.449259),
+new google.maps.LatLng(59.019336,	11.454241),
+new google.maps.LatLng(59.021497,	11.458969),
+new google.maps.LatLng(59.023663,	11.461267),
+new google.maps.LatLng(59.026629,	11.464746),
+new google.maps.LatLng(59.029577,	11.469192),
+new google.maps.LatLng(59.032918,	11.466425),
+new google.maps.LatLng(59.033162,	11.467070),
+new google.maps.LatLng(59.028137,	11.477559),
+new google.maps.LatLng(59.027327,	11.478311),
+new google.maps.LatLng(59.024238,	11.480598),
+new google.maps.LatLng(59.024161,	11.481115),
+new google.maps.LatLng(59.023612	, 11.481598),
+new google.maps.LatLng(59.023097	, 11.482450),
+new google.maps.LatLng(59.022608	, 11.482676),
+new google.maps.LatLng(59.018822	, 11.485435),
+new google.maps.LatLng(59.019497	, 11.488175),
+new google.maps.LatLng(59.020329	, 11.489751),
+new google.maps.LatLng(59.020362	, 11.490119),
+new google.maps.LatLng(59.020233	, 11.490554),
+new google.maps.LatLng(59.020574	, 11.491050),
+new google.maps.LatLng(59.021009	, 11.491551),
+new google.maps.LatLng(59.021854	, 11.491743),
+new google.maps.LatLng(59.021983	, 11.494131),
+new google.maps.LatLng(59.022141	, 11.494325),
+new google.maps.LatLng(59.022489	, 11.493750),
+new google.maps.LatLng(59.022624	, 11.493759),
+new google.maps.LatLng(59.022483	, 11.494063),
+new google.maps.LatLng(59.022575	, 11.494174),
+new google.maps.LatLng(59.022766	, 11.494083),
+new google.maps.LatLng(59.023415	, 11.494653),
+new google.maps.LatLng(59.023482	, 11.495364),
+new google.maps.LatLng(59.023719	, 11.495694),
+new google.maps.LatLng(59.024551	, 11.495885),
+new google.maps.LatLng(59.023783	, 11.497241),
+
+new google.maps.LatLng(59.023769	, 11.497266),
+new google.maps.LatLng(59.022408	, 11.496566),
+new google.maps.LatLng(59.021320	, 11.497768),
+new google.maps.LatLng(59.020276	, 11.497431),
+new google.maps.LatLng(59.020001	, 11.496993),
+new google.maps.LatLng(59.018339	, 11.496533),
+new google.maps.LatLng(59.018281	, 11.499534),
+new google.maps.LatLng(59.019227	, 11.500073),
+new google.maps.LatLng(59.019376	, 11.500763),
+new google.maps.LatLng(59.020208	, 11.501608),
+new google.maps.LatLng(59.020886	, 11.501396),
+new google.maps.LatLng(59.021233	, 11.500872),
+new google.maps.LatLng(59.022365	, 11.500902),
+new google.maps.LatLng(59.024756	, 11.501311),
+new google.maps.LatLng(59.025934	, 11.501031),
+new google.maps.LatLng(59.027362	, 11.501762),
+new google.maps.LatLng(59.028465	, 11.502574),
+new google.maps.LatLng(59.029979	, 11.505089),
+new google.maps.LatLng(59.031502	, 11.507893),
+new google.maps.LatLng(59.031730	, 11.511413),
+new google.maps.LatLng(59.031821	, 11.512308),
+new google.maps.LatLng(59.031312	, 11.514886),
+new google.maps.LatLng(59.030201	, 11.515902),
+new google.maps.LatLng(59.027968	, 11.519164),
+new google.maps.LatLng(59.026696	, 11.521502),
+new google.maps.LatLng(59.021793	, 11.533819),
+new google.maps.LatLng(59.020498	, 11.538010),
+new google.maps.LatLng(59.019513	, 11.542172),
+new google.maps.LatLng(59.019166	, 11.545413)
+
+
+
+];
+
+var pkt_grense2 = [
+
+new google.maps.LatLng(59.002562	, 11.531700),
+new google.maps.LatLng(59.002914	, 11.531621),
+new google.maps.LatLng(59.003131	, 11.530854),
+new google.maps.LatLng(59.003129	, 11.528894),
+new google.maps.LatLng(59.003028	, 11.526457),
+new google.maps.LatLng(59.003254	, 11.525899),
+new google.maps.LatLng(59.003382	, 11.525569),
+new google.maps.LatLng(59.003182	, 11.524771),
+new google.maps.LatLng(59.003039	, 11.524499),
+new google.maps.LatLng(59.003193	, 11.524197),
+new google.maps.LatLng(59.003582	, 11.523598),
+new google.maps.LatLng(59.003776	, 11.523351),
+new google.maps.LatLng(59.003679	, 11.522796),
+new google.maps.LatLng(59.003326	, 11.522247),
+new google.maps.LatLng(59.003069	, 11.522255),
+new google.maps.LatLng(59.002820	, 11.522628),
+new google.maps.LatLng(59.002462	, 11.523020),
+new google.maps.LatLng(59.002164	, 11.523076),
+new google.maps.LatLng(59.001227	, 11.522041),
+new google.maps.LatLng(59.000810	, 11.522037),
+new google.maps.LatLng(59.000546	, 11.521704),
+new google.maps.LatLng(58.999005	, 11.519188),
+new google.maps.LatLng(58.998854	, 11.519334),
+new google.maps.LatLng(58.998034	, 11.518543),
+new google.maps.LatLng(58.996654	, 11.521576),
+new google.maps.LatLng(58.995665	, 11.521869),
+new google.maps.LatLng(58.994920	, 11.521371),
+new google.maps.LatLng(58.994281	, 11.520933),
+new google.maps.LatLng(58.993745	, 11.520789),
+new google.maps.LatLng(58.992799	, 11.520903),
+new google.maps.LatLng(58.992714	, 11.520426),
+new google.maps.LatLng(58.992285	, 11.520317),
+new google.maps.LatLng(58.992045	, 11.520168),
+new google.maps.LatLng(58.991526	, 11.520522),
+new google.maps.LatLng(58.991172	, 11.520705),
+new google.maps.LatLng(58.990987	, 11.520535),
+new google.maps.LatLng(58.989631	, 11.520984),
+new google.maps.LatLng(58.988332	, 11.520524),
+new google.maps.LatLng(58.988961	, 11.520048),
+new google.maps.LatLng(58.988999	, 11.519502),
+new google.maps.LatLng(58.989527	, 11.516590),
+new google.maps.LatLng(58.989366	, 11.515873),
+new google.maps.LatLng(58.989706	, 11.515741),
+new google.maps.LatLng(58.990499	, 11.512352),
+new google.maps.LatLng(58.991897	, 11.509059),
+new google.maps.LatLng(58.991920	, 11.508591),
+new google.maps.LatLng(58.992236	, 11.506890),
+new google.maps.LatLng(58.992472	, 11.506516),
+new google.maps.LatLng(58.993425	, 11.505331),
+new google.maps.LatLng(58.994078	, 11.505013),
+new google.maps.LatLng(58.994247	, 11.504634),
+new google.maps.LatLng(58.994584	, 11.502543),
+new google.maps.LatLng(58.995054	, 11.500566),
+new google.maps.LatLng(58.995209	, 11.499506),
+new google.maps.LatLng(58.995931	, 11.497704),
+new google.maps.LatLng(58.996292	, 11.497130),
+new google.maps.LatLng(58.996881	, 11.496676),
+new google.maps.LatLng(58.997237	, 11.496389),
+new google.maps.LatLng(58.997203	, 11.496021),
+new google.maps.LatLng(58.997089	, 11.495673),
+new google.maps.LatLng(58.997376	, 11.494048),
+new google.maps.LatLng(58.997543	, 11.493068),
+new google.maps.LatLng(58.997823	, 11.491808),
+new google.maps.LatLng(58.998751	, 11.490543),
+new google.maps.LatLng(58.998907	, 11.489405),
+new google.maps.LatLng(58.998672	, 11.489049),
+new google.maps.LatLng(58.997939	, 11.488604),
+new google.maps.LatLng(58.996977	, 11.488169),
+new google.maps.LatLng(58.996252	, 11.488038),
+new google.maps.LatLng(58.995946	, 11.487833),
+new google.maps.LatLng(58.995628	, 11.488254),
+new google.maps.LatLng(58.995203	, 11.487910),
+new google.maps.LatLng(58.994741	, 11.488112),
+new google.maps.LatLng(58.994501	, 11.487990),
+new google.maps.LatLng(58.994487	, 11.487310),
+new google.maps.LatLng(58.994238	, 11.486953),
+new google.maps.LatLng(58.993890	, 11.486823),
+new google.maps.LatLng(58.993732	, 11.486629),
+new google.maps.LatLng(58.993846	, 11.486298),
+new google.maps.LatLng(58.994119	, 11.486134),
+new google.maps.LatLng(58.994072	, 11.485765),
+new google.maps.LatLng(58.993592	, 11.485496),
+new google.maps.LatLng(58.993161	, 11.484786),
+new google.maps.LatLng(58.992246	, 11.483989),
+new google.maps.LatLng(58.991101	, 11.482574),
+new google.maps.LatLng(58.990340	, 11.482180),
+new google.maps.LatLng(58.989788	, 11.481435),
+new google.maps.LatLng(58.989398	, 11.480728),
+new google.maps.LatLng(58.988587	, 11.480148),
+new google.maps.LatLng(58.988004	, 11.479610),
+new google.maps.LatLng(58.986909	, 11.478356),
+new google.maps.LatLng(58.985740	, 11.476784),
+new google.maps.LatLng(58.985580	, 11.476694)
+];
+
+/* 3: rundt Mo */
+var pkt_grense3 = [
+new google.maps.LatLng(59.024461,	11.515169),
+new google.maps.LatLng(59.023327,	11.513858),
+new google.maps.LatLng(59.021788,	11.512596),
+new google.maps.LatLng(59.020687,	11.511679),
+new google.maps.LatLng(59.020089,	11.510564),
+new google.maps.LatLng(59.019277,	11.510766),
+new google.maps.LatLng(59.019441,	11.512006),
+new google.maps.LatLng(59.019270,	11.512490),
+new google.maps.LatLng(59.020123,	11.515062),
+new google.maps.LatLng(59.020954,	11.514600),
+new google.maps.LatLng(59.021848,	11.514351),
+new google.maps.LatLng(59.022678,	11.514673),
+new google.maps.LatLng(59.023695,	11.515035),
+new google.maps.LatLng(59.024339,	11.515161)
+];
+
+var grenser= [
+pkt_grense,
+pkt_grense2,
+pkt_grense3
+];
+
+
+
+
+// Onload handler to fire off the app.
+google.maps.event.addDomListener(window, 'load', initialize);  
+</script>
+</head>
+
+
+<body> 
+  <div id="mapCanvas"></div> 
+  <div id="footer">
+  <a href="http://www.statkart.no">Statens kartverk</a>, <a href="http://www.statkart.no/nor/Land/Fagomrader/Geovekst/">Geovekst</a> og <a href="http://www.statkart.no/?module=Articles;action=Article.publicShow;ID=14194">kommuner</a>
+  </div>
+</body> 
+</html>

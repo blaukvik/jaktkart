@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Stort drev - Folkeseth til Toli</title>
+
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript"
+    src="http://maps.google.com/maps/api/js?sensor=false">
+</script>
+
+<link rel="stylesheet" media="screen and (min-device-width: 801px)" type="text/css" href="jakt.css" />
+<LINK rel="stylesheet" media="screen and (max-device-width: 800px)" type="text/css" href="jakt_small.css">
+
+<script type="text/javascript" src="jaktkart.js"></script>
+
+<script type="text/javascript">
+
+var pos_center 	= new google.maps.LatLng(59.0050, 11.5010);
+var zoom_level = 14;
+var num_poster = 31;
+
+var post_pos = [
+  new google.maps.LatLng(58.99715, 11.49917),  // Kirkeveien
+  new google.maps.LatLng(58.99612, 11.50041),  // Kirkeveien
+  new google.maps.LatLng(58.99495, 11.50355),  // Snuplass
+  new google.maps.LatLng(58.99264, 11.50697),  // Gjetemyr
+  new google.maps.LatLng(58.99198, 11.50950),  // Linnehohalsen 1
+  new google.maps.LatLng(58.99303, 11.51219),  // Linnehohalsen 2
+
+new google.maps.LatLng(59.0030, 11.4905),  //brekkerampa
+new google.maps.LatLng(59.0058, 11.4930),  //frydenlund
+new google.maps.LatLng(59.0074, 11.4953),  //tårnet
+new google.maps.LatLng(59.0079, 11.4976),  //værkhaugen
+new google.maps.LatLng(59.0076, 11.5015),  // kasa 1
+new google.maps.LatLng(59.0065, 11.5028),  // kasa 2
+new google.maps.LatLng(59.0039, 11.5056),  // dammane 1
+new google.maps.LatLng(59.0020, 11.5071),  // dammane 2
+new google.maps.LatLng(59.0012, 11.5082),  // halvores hus
+new google.maps.LatLng(58.9996, 11.5112),  // ospene
+new google.maps.LatLng(58.9966, 11.5136),  // lille svarttj
+new google.maps.LatLng(58.9938, 11.5173),   // store svarttj
+
+//19
+new google.maps.LatLng(58.9955, 11.5210),   // holtene 1
+new google.maps.LatLng(58.9958, 11.5193),   // holtene 2
+new google.maps.LatLng(58.9940, 11.5205),   // holtene 3  OK
+new google.maps.LatLng(59.0030, 11.5210),   // stenersrød
+
+new google.maps.LatLng(59.01536, 11.50515),   // blekasbakken
+new google.maps.LatLng(59.01583, 11.50961),  // ved ødegården
+new google.maps.LatLng(59.01508, 11.51196),   // øya
+new google.maps.LatLng(59.01489, 11.51507),   // høyspent
+new google.maps.LatLng(59.01720, 11.51920),   // havrekas/over jbn
+new google.maps.LatLng(59.01360, 11.51661),   // toli
+new google.maps.LatLng(59.01193, 11.51818),   // tolijordet
+new google.maps.LatLng(59.01066, 11.51903),   // jakttårn
+new google.maps.LatLng(59.00940, 11.52143)    // ila
+
+];
+
+
+// Onload handler to fire off the app.
+google.maps.event.addDomListener(window, 'load', initialize);  
+</script>
+</head>
+
+
+<body> 
+  <div id="mapCanvas"></div> 
+  <div id="infoPanel"> 
+  <br>
+    <b>Stort drev - Folkeseth til Toli</b> 
+  <br>
+  <br>
+  <table cellspacing="0" cellpadding="10 em" border="2">
+  <tr>
+<th>Post</th>
+<th>Navn</th>
+<th>Beskrivelse</th>
+</tr><tr>
+  <td>1</td><td>Brekkedalen</td><td>Ved veien i bakken opp mot Svein.</td>
+  </tr>
+  <tr>
+  <td>2</td><td>Frydenlund 1</td><td>I jordekantene ved Frydenlund</td>
+  </tr>
+  <tr>
+  <td>3</td><td>Frydenlund 2</td><td>Var tidligere tårnet ved brua) <p> Ved veien</p>  </td>
+  </tr>
+  <tr>
+  <td>4</td><td>Værkhaugen</td><td>Ved A-masta eller i jordekanten på andre siden av bekken</td>
+  </tr>
+  <tr>
+  <td>5</td><td>Kasa 1</td><td>I jordekanten ca 50 m før kryss</td>
+  </tr>
+  <tr>
+  <td>6</td><td>Kasa 2</td><td>Videre inn traktorveien mot Dammane</td>
+  </tr>
+  <tr>
+  <td>7</td><td>Dammane 1</td><td>Første flate i Dammane, opp tråkket på fjellet</td>
+  </tr>
+  <tr>
+  <td>8</td><td>Dammane 2</td><td>Andre flate, opp tråkket</td>
+  </tr>
+  <tr>
+  <td>9</td><td>Halvores hus</td><td>Trangeste punkt i oppgangen</td>
+  </tr>
+  <tr>
+  <td>10</td><td>Ospene</td><td>Oppgangen</td>
+  </tr>
+  <tr>
+  <td>11</td><td>Lille Svarttj 1</td><td>Nordenden av tjernet</td>
+  </tr>
+  <tr>
+  <td>12</td><td>Lille Svarttj 2</td><td>Nordenden av tjernet</td>
+  </tr>
+
+  </table>
+
+  <br>
+    <b>Egen pos:</b>  <div id="gpsPos" style="display:inline;">POS:</div> 
+  <br>
+    <b>Accuracy:</b>  <div id="gpsAccu" style="display:inline;">XX</div> meter
+  <br>
+    <b>Speed:</b>  <div id="gpsSpeed" style="display:inline;">XX</div> m/s
+
+  <br>
+
+  </div> 
+  <div id="footer">
+  <a href="http://www.statkart.no">Statens kartverk</a>, <a href="http://www.statkart.no/nor/Land/Fagomrader/Geovekst/">Geovekst</a> og <a href="http://www.statkart.no/?module=Articles;action=Article.publicShow;ID=14194">kommuner</a>
+  </div>
+</body> 
+</html>

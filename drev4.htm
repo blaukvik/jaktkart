@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<head>
+<title>Drev 4 - Sørfjella: Fra Folkåa til S'n </title>
+
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript"
+    src="http://maps.google.com/maps/api/js?sensor=false">
+</script>
+
+<link rel="stylesheet" media="screen and (min-device-width: 801px)" type="text/css" href="jakt.css" />
+<LINK rel="stylesheet" media="screen and (max-device-width: 800px)" type="text/css" href="jakt_small.css">
+
+<script type="text/javascript" src="jaktkart.js"></script>
+
+<script type="text/javascript">
+
+    var pos_center 	= new google.maps.LatLng(58.99423, 11.47989);
+    
+var zoom_level = 15;
+var num_poster = 14;
+
+var post_pos = [
+new google.maps.LatLng(58.98942, 11.47938),  // kastet
+new google.maps.LatLng(58.99413, 11.48507),    
+new google.maps.LatLng(58.99480, 11.48748),    
+new google.maps.LatLng(58.99651, 11.48554),   // sørfjellavn 1
+new google.maps.LatLng(58.99544, 11.48475),    
+new google.maps.LatLng(58.99464, 11.48353),    
+new google.maps.LatLng(58.99678, 11.48709),  // pinnebakken     
+new google.maps.LatLng(58.99769, 11.48612),  // grønli 1    
+new google.maps.LatLng(58.99942, 11.48373),  // grønli 2   
+new google.maps.LatLng(58.99966, 11.48235),   // brekkerampa
+new google.maps.LatLng(59.00023, 11.47865),   //bergsta   
+new google.maps.LatLng(58.99914, 11.47658),   // bru   
+new google.maps.LatLng(58.99741, 11.47420),   // hogstflate 
+new google.maps.LatLng(58.99650, 11.47123)  // grønne bakken
+];
+
+
+// Onload handler to fire off the app.
+google.maps.event.addDomListener(window, 'load', initialize);  
+</script>
+</head>
+
+
+<body> 
+  <div id="mapCanvas"></div> 
+  <div id="infoPanel"> 
+  <br>
+    <b>Drev 4: Sørfjella</b> <br> Fra Folkåa til S'n 
+  <br>
+  <br>
+  <table cellspacing="0" cellpadding="10 em" border="2">
+  <tr>
+<th>Post</th>
+<th>Navn</th>
+<th>Beskrivelse</th>
+</tr>
+  <tr>
+  <td>1</td><td>Kastet</td><td>Ytterst mot fjorden</td>
+  </tr>
+  <tr>
+  <td>2</td><td>Sommerfjøset 1</td><td>Ved skarp sving på elva</td>
+  </tr>
+  <tr>
+  <td>3</td><td>Sommerfjøset 2</td><td>Ved skarp sving på elva</td>
+  </tr>
+  <tr>
+  <td>4</td><td>Sørfjellavn 1</td><td>Ca 150 m fra brua</td>
+  </tr>
+  <tr>
+  <td>5</td><td>Sørfjellavn 2</td><td>Ca 150 m fra brua</td>
+  </tr>
+  <tr>
+  <td>6</td><td>Sørfjellavn 3</td><td>Ca 50 m inne i skogen</td>
+  </tr>
+  <tr>
+  <td>7</td><td>Pinnebakken</td><td>I traktorvei ved brua</td>
+  </tr>
+
+  <tr>
+  <td>8</td><td>Grønli 1</td><td>Ved riksvei ca 100 m fra traktorvei</td>
+  </tr>
+  <tr>
+  <td>9</td><td>Grønli 2</td><td>Ved riksvei ca 100 m fra Brekkerampa</td>
+  </tr>
+  <tr>
+  <td>10</td><td>Brekkerampa</td><td>Mellom rampe og skogsvei, i myrkant</td>
+  </tr>
+  <tr>
+  <td>11</td><td>Bergsta</td><td>På kanten ut mot hogstflate</td>
+  </tr>
+  <tr>
+  <td>12</td><td>Kavlebru</td><td>Nede i enden av hogstflate</td>
+  </tr>
+  <tr>
+  <td>13</td><td>Hogstflate vest</td><td>Inne mot fjellet i hogstflate</td>
+  </tr>
+  <tr>
+  <td>14</td><td>Grønne bakken</td><td>Skarp sving på vei ned mot fjorden</td>
+  </tr>
+  </table>
+  <br>
+    <b>Egen pos:</b>  <div id="gpsPos" style="display:inline;">POS:</div> 
+  <br>
+    <b>Accuracy:</b>  <div id="gpsAccu" style="display:inline;">XX</div> meter
+  <br>
+    <b>Speed:</b>  <div id="gpsSpeed" style="display:inline;">XX</div> m/s
+  
+  <br>
+  
+  </div> 
+  <div id="footer">
+  <a href="http://www.statkart.no">Statens kartverk</a>, <a href="http://www.statkart.no/nor/Land/Fagomrader/Geovekst/">Geovekst</a> og <a href="http://www.statkart.no/?module=Articles;action=Article.publicShow;ID=14194">kommuner</a>
+  </div>
+</body> 
+</html>
