@@ -1,4 +1,0 @@
-jaktkart
-========
-
-Jaktkart javascript
