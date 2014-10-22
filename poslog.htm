@@ -29,6 +29,7 @@ visEgenPos = 1;
 autoSentrer = 1;
 runTimer = 1;
 visAndre = 1;
+ownGruppe='test';
 
 var post_pos = [
 ];
@@ -47,32 +48,32 @@ google.maps.event.addDomListener(window, 'load', initialize);
   
 <form>
   
-  <!-- the infopanel is placed top right on PC, or below map on phone -->
   <div id="infoPanel"> 
-  <br>
-    <b>Oppdatert:</b>  <div id="gpsTime" style="display:inline;">ikke begynt</div>
-  <br>
+  <br/>
+    <b>Oppdatert:</b>  <div id="gpsTime" style="display:inline;">ikke f&aring;tt posisjon enda</div>
+  <br/>
     <b>Status:</b>  <div id="gpsStatus" style="display:inline;">ikke begynt</div>  
-  <br>
+  <br/>
     <b>Pos:</b>  <div id="gpsPos" style="display:inline;">ikke begynt</div>  
-  </div> 
+
   <div id="cmdPanel">
-    <br>
-    <label for="userid">User ID :</label>
-    <input type="text" name ="userid" id="userid" onblur="setUserId()" />
-    <div id="div1"></div>
+    <br/>
     <input type="button" value ="Les posisjoner" onclick="onKlikkLesPosisjoner()" />
 
-    <label for="post">Post :</label>
-    <div id="svar"></div>
-    <input type="button" value ="Send posisjon" onclick="TESTSEND()" />
+    <input type="button" value ="Send posisjon" onclick="onKlikkSendOwnPos()" />
+    
+<br/>
+    <div id="svar" style="display:inline;">svar</div>
+    <br/>
+    <div id="personer" style="display:inline;">Ingen andre</div>
 
   </div>
+  </div> 
   
   <!-- the footer is placed below all -->
   <div id="footer">
   <a href="http://www.statkart.no">Statens kartverk</a>, <a href="http://www.statkart.no/nor/Land/Fagomrader/Geovekst/">Geovekst</a> og <a href="http://www.statkart.no/?module=Articles;action=Article.publicShow;ID=14194">kommuner</a>
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Send rettelser og eller kommentarer til <a href="mailto:bla@morecom.no">B�rd Laukvik</a>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Send rettelser og eller kommentarer til <a href="mailto:bla@morecom.no">B&aring;rd Laukvik</a>
   </div>
 </form>
   </body> 

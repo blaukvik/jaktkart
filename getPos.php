@@ -8,6 +8,15 @@ header('Content-type: application/json; charset=utf-8');
   $log_name = "pos.log";
   $fp=fopen( $log_dir . $log_name, 'a' );
 
+  $fstat = fstat($fp);
+  if ($fstat['size'] > 10000)
+  {
+    // begynn på ny
+    ftruncate($fp, 0);
+  $log_entry = gmdate('r') . "(Truncated)\n";
+  fputs($fp, $log_entry);
+  }
+
 if ( isset($_POST) && is_array($_POST) && count($_POST) > 0 ) { 
   $log_entry = gmdate('r') . "\t" . $_SERVER['REQUEST_URI'] . "-" . serialize($_POST) . "\n";
   fputs($fp, $log_entry);
@@ -30,7 +39,6 @@ else
   $log_entry = gmdate('r') . "jsongruppe= " . $jsongruppe . "\n";
   fputs($fp, $log_entry);
 
-  $jsongruppe = '{"gruppe":"test"}';
   $posquery = json_decode($jsongruppe);
 
 

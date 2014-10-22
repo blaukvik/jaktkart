@@ -3,11 +3,23 @@ margin:0px;
 height:100%; /* this is the key! */ 
 }   
 
+.plabel {
+     color: red;
+     background-color: white;
+font-family: "Lucida Grande", "Arial", sans-serif;
+font-size: 10px;
+font-weight: bold;
+text-align: center;
+width: 40px;     
+border: 2px solid black;
+white-space: nowrap;
+}
+
 /* default is canvas top left, info top right
    but this is changed for phones
  */ 
   #mapCanvas {
-    width: 65%;
+    width: 75%;
     height: 100%;
     float: left;
     /*border: 1px solid #666;*/
@@ -18,7 +30,7 @@ height:100%; /* this is the key! */
     padding-left: 1em;
     border: 1px solid #666;
     */
-    width: 30%;
+    width: 20%;
     height: 100%;
     float: right;
     padding-right: 0em;

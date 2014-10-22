@@ -1,23 +1,34 @@
 <!DOCTYPE html>
 <html>
+    	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
 <head>
 <title>Drev 9 - Lundene: Fra Rinnane til Lundenesaga</title>
 
-<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+
 <script type="text/javascript"
     src="http://maps.google.com/maps/api/js?sensor=false">
 </script>
 
+<script type="text/javascript" src="Posisjon.js"></script>
+<script type="text/javascript" src="markerwithlabel.js"></script>
+<script type="text/javascript" src="jaktkart.js"></script>
+
 <link rel="stylesheet" media="screen and (min-device-width: 801px)" type="text/css" href="jakt.css" />
 <LINK rel="stylesheet" media="screen and (max-device-width: 800px)" type="text/css" href="jakt_small.css">
 
-<script type="text/javascript" src="jaktkart.js"></script>
-
 <script type="text/javascript">
 
-var pos_center 	= new google.maps.LatLng(59.03641, 11.49874);
-var zoom_level = 15;
-var num_poster = 13;
+visEgenPos = 1;
+autoSentrer = 1;
+runTimer = 1;
+visAndre = 1;
+ownGruppe='buerjakt';
+
+pos_center 	= new google.maps.LatLng(59.03641, 11.49874);
+zoom_level = 15;
+num_poster = 13;
 
 var post_pos = [
   new google.maps.LatLng(59.04274, 11.50567),  // Briketten
@@ -29,7 +40,7 @@ var post_pos = [
   new google.maps.LatLng(59.03473, 11.50168),  // Lundene 2
   new google.maps.LatLng(59.03449, 11.49917),  // Lundene 3  
   new google.maps.LatLng(59.03489, 11.49455),  // Sla 1/Nordre
-  new google.maps.LatLng(59.03249, 11.49558),  // Sla 2/søndre
+  new google.maps.LatLng(59.03249, 11.49558),  // Sla 2/sï¿½ndre
   new google.maps.LatLng(59.02879, 11.49462),  // Furuene 1 (Kavlebrua ?)
   new google.maps.LatLng(59.02758, 11.49374),  // Furuene 2
   new google.maps.LatLng(59.04300, 11.49401)   // Brikettveien  
@@ -59,31 +70,31 @@ google.maps.event.addDomListener(window, 'load', initialize);
   <td>1</td><td>Briketten</td><td>Ved snuplass ved jernbanen</td>
   </tr>
   <tr>
-  <td>2</td><td>Lundene stopp</td><td>Ca 50 syd for Lundene stopp, østsiden</td>
+  <td>2</td><td>Lundene stopp</td><td>Ca 50 syd for Lundene stopp, Ã¸stsiden</td>
   </tr>
   <tr>
-  <td>3</td><td>Myra</td><td>På forhøyning ca 200 m syd for Lundene stopp, østsiden</td>
+  <td>3</td><td>Myra</td><td>PÃ¥ forhÃ¸yning ca 200 m syd for Lundene stopp, Ã¸stsiden</td>
   </tr>
   <tr>
   <td>4</td><td>Saga 1</td><td>I myra mellom veien og jernbanen, under fjellet</td>
   </tr>
   <tr>
-  <td>5</td><td>Saga 2</td><td>På fjellet ved veien nord for saga, østsiden</td>
+  <td>5</td><td>Saga 2</td><td>PÃ¥ fjellet ved veien nord for saga, Ã¸stsiden</td>
   </tr>
   <tr>
-  <td>6</td><td>Lundene 1</td><td>På kanten av Bakkanejordet vest for veien</td>
+  <td>6</td><td>Lundene 1</td><td>PÃ¥ kanten av Bakkanejordet vest for veien</td>
   </tr>
   <tr>
-  <td>7</td><td>Lundene 2</td><td>Søndre hjørne i haven på Lundene</td>
+  <td>7</td><td>Lundene 2</td><td>SÃ¸ndre hjÃ¸rne i haven pÃ¥ Lundene</td>
   </tr>
   <tr>
-  <td>8</td><td>Lundene 3</td><td>På øy ca 100 meter fra vei ned mot sla</td>
+  <td>8</td><td>Lundene 3</td><td>PÃ¥ Ã¸y ca 100 meter fra vei ned mot sla</td>
   </tr>
   <tr>
-  <td>9</td><td>Sla 1/Nordre</td><td>På fjell med utsikt over elva</td>
+  <td>9</td><td>Sla 1/Nordre</td><td>PÃ¥ fjell med utsikt over elva</td>
   </tr>
   <tr>
-  <td>10</td><td>Sla 2/Søndre</td><td>I fjellskråning med utsikt over flate</td>
+  <td>10</td><td>Sla 2/SÃ¸ndre</td><td>I fjellskrÃ¥ning med utsikt over flate</td>
   </tr>
   <tr>
   <td>11</td><td>Furuene 1 (Kavlebrua ?)</td><td>Ned til elva der hvor traktorvei krysser elva</td>
@@ -92,16 +103,29 @@ google.maps.event.addDomListener(window, 'load', initialize);
   <td>12</td><td>Furuene 2</td><td>Ca 100 m syd for post 11, i fjellsiden</td>
   </tr>
   <tr>
-  <td>13</td><td>Brikettveien</td><td>Mellom veien og elva ved innkjørsel til Briketten</td>
+  <td>13</td><td>Brikettveien</td><td>Mellom veien og elva ved innkjÃ¸rsel til Briketten</td>
   </tr>
   </table>
-  <br>
-    <b>Egen pos:</b>  <div id="gpsPos" style="display:inline;">POS:</div> 
-  <br>
-    <b>Accuracy:</b>  <div id="gpsAccu" style="display:inline;">XX</div> meter
-  <br>
-    <b>Speed:</b>  <div id="gpsSpeed" style="display:inline;">XX</div> m/s
-  
+  <br/>
+  <b>Oppdatert:</b>  <div id="gpsTime" style="display:inline;">ikke f&aring;tt posisjon enda</div>
+  <br/>
+<b>Status:</b>  <div id="gpsStatus" style="display:inline;">ikke begynt</div>
+<br/>
+<b>Pos:</b>  <div id="gpsPos" style="display:inline;">ikke begynt</div>
+
+
+<div id="cmdPanel">
+<br/>
+<input type="button" value ="Les posisjoner" onclick="onKlikkLesPosisjoner()" />
+
+<input type="button" value ="Send posisjon" onclick="onKlikkSendOwnPos()" />
+
+<br/>
+<div id="svar" style="display:inline;">svar</div>
+<br/>
+<div id="personer" style="display:inline;">Ingen andre</div>
+
+</div>
   </div> 
   <div id="footer">
   <a href="http://www.statkart.no">Statens kartverk</a>, <a href="http://www.statkart.no/nor/Land/Fagomrader/Geovekst/">Geovekst</a> og <a href="http://www.statkart.no/?module=Articles;action=Article.publicShow;ID=14194">kommuner</a>

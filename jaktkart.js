@@ -17,12 +17,15 @@ var ownPosition;
 var ownAccuracy;
 var visEgenPos;
 var visAndre;
-var aldersgrense = (1000 * 60 * 60 * 24);
+var getInterval = 10000;
+//var aldersgrense = (1000 * 60 * 60 * 24);
+var aldersgrense = (1000 * 60 * 60 * 4);
 var autoSentrer;
 var runTimer;
-var ownNavn = 'Bla';
-var ownGruppe = 'test';
+var ownNavn;
+var ownGruppe;
 var posliste;
+var antallPos = 0;
 
 var hale;
 var updateLocation ;
@@ -33,458 +36,7 @@ var nopos = false;
 var sendPosUpdates = 1;
 var lastPosSent = 0;
 
-/*
-*/
-function StatkartMapType(name, layer) {
-  this.layer = layer;
-  this.name = name;
-  this.alt = name;
 
-  this.tileSize = new google.maps.Size(256,256);
-  this.maxZoom = 19;
-  this.getTile = function(coord, zoom, ownerDocument) {
-      var div = ownerDocument.createElement('DIV');
-      div.style.width = this.tileSize.width + 'px';
-      div.style.height = this.tileSize.height + 'px';
-      div.style.backgroundImage = "url(http://opencache.statkart.no/gatekeeper/gk/gk.open_gmaps?layers=" + this.layer + "&zoom=" + zoom + "&x=" + coord.x + "&y=" + coord.y + ")";
-      return div;
-    };
-}
-
-      
-
-/*
-   handler for knapp - EgenPos
-*/
-function HomeControl(controlDiv, map) {
-
-  // Set CSS styles for the DIV containing the control
-  // Setting padding to 5 px will offset the control
-  // from the edge of the map
-  controlDiv.style.padding = '5px';
-
-  // Set CSS for the control border
-  var controlUI = document.createElement('HOMEDIV');
-  controlUI.style.backgroundColor = 'white';
-  controlUI.style.borderStyle = 'solid';
-  controlUI.style.borderWidth = '2px';
-  controlUI.style.cursor = 'pointer';
-  controlUI.style.textAlign = 'center';
-  controlUI.title = 'Klikk for &aring; sentrere p&aring; egen pos';
-  controlDiv.appendChild(controlUI);
-
-  // Set CSS for the control interior
-  var controlText = document.createElement('HOMEDIV');
-  controlText.style.fontFamily = 'Arial,sans-serif';
-  controlText.style.fontSize = '12px';
-  controlText.style.paddingLeft = '4px';
-  controlText.style.paddingRight = '4px';
-  controlText.innerHTML = '<b>Egen pos</b>';
-  controlUI.appendChild(controlText);
-
-  // Setup the click event listeners: simply set the map to
-  // Chicago
-  google.maps.event.addDomListener(controlUI, 'click', function() {
-  
-    updCount = 0;
-    setText('gpsStatus', 'Henter egen pos igjen');
-  
-    // check pos again just in case
-    getOwnPosition();
-
-    // now center
-    //map.setCenter(ownPosition);
-  });
-
-}
-
-/*
-   handler for knapp - Drev
-*/
-function DrevControl(controlDiv, map) {
-
-  // Set CSS styles for the DIV containing the control
-  // Setting padding to 5 px will offset the control
-  // from the edge of the map
-  controlDiv.style.padding = '5px';
-
-  // Set CSS for the control border
-  var controlUI = document.createElement('DREVDIV');
-  controlUI.style.backgroundColor = 'white';
-  controlUI.style.borderStyle = 'solid';
-  controlUI.style.borderWidth = '2px';
-  controlUI.style.cursor = 'pointer';
-  controlUI.style.textAlign = 'center';
-  controlUI.title = 'Klikk for &aring; sentrere p&aring; drev';
-  controlDiv.appendChild(controlUI);
-
-  // Set CSS for the control interior
-  var controlText = document.createElement('DREVDIV');
-  controlText.style.fontFamily = 'Arial,sans-serif';
-  controlText.style.fontSize = '12px';
-  controlText.style.paddingLeft = '4px';
-  controlText.style.paddingRight = '4px';
-  controlText.innerHTML = '<b>Senter</b>';
-  controlUI.appendChild(controlText);
-
-  // Setup the click event listeners: simply set the map to
-  // Chicago
-  google.maps.event.addDomListener(controlUI, 'click', function() {
-    map.setCenter(pos_center);
-    map.setZoom(zoom_level);
-  });
-
-}
-
-/*
-*/
-function gotPositionOK(position) {
-  // got a position  
-  
-  ownPosition = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
-  ownAccuracy = position.coords.accuracy;
-          
-  var posTime = new Date(position.timestamp);
-
-  if (autoSentrer === undefined || autoSentrer === 1)
-  {
-      logText("AutoSentrer egen pos");
-    // flytt marker dit (ble satt til center først)
-    own_marker.setPosition(ownPosition);
-
-    // flytt circle and update radius & color
-    own_circle.setCenter(ownPosition);
-
-   // set egen plass midt på kart
-    map.setCenter(ownPosition);
-  }
-  
-  own_circle.setRadius(position.coords.accuracy);
-
-  if (nopos === true)
-  {
-    nopos = false;
-  }
-
-  
-  
-  setText('gpsStatus', "upd="+updCount+"," + "gotPosOK");
-  //setText('gpsPos', "xlat: " + position.coords.latitude + ", lon: " +position.coords.longitude);
-  setText('gpsPos', "xlatx: " + ownPosition.lat() + ", lon: " +ownPosition.lng());
-  //tText('gpsAccu').innerHTML = position.coords.accuracy;  
-  setOppdatertTid(posTime);
-  
-
-/*
-	hale
-*/
-	if (hale === undefined)
-	{
-		var linjefarge = "#E01BE0";
-		var tykkelse = 3;
-		hale = new google.maps.Polyline({
-			strokeColor : linjefarge,
-			strokeOpacity : 1.0,
-			map : map,
-			strokeWeight : tykkelse
-		});
-	}
-	else
-	{
-		hale.getPath().clear();
-	}
-         
-  // cancel any old watcher       
-  if(updateLocation !== null)
-  {
-    navigator.geolocation.clearWatch(updateLocation);  
-  }  
-  
-  // start watching      
-  updateLocation = navigator.geolocation.watchPosition(
-    positionUpdateFromWatch, 
-    positionUpdateFailed,
-    {enableHighAccuracy:true, maximumAge:30000, timeout:30000});               
-}
-
-
-function gotPositionFailed(error) {
-  /* første get etter klikk feilet, typisk timeout 
-     watch er ikke startet ?
-     
-     
-     
-  */
-
-/*  if(own_marker)
-  {
-    own_marker.setMap(null);
-  }
-  if(circle)
-  {
-    own_circle.setMap(null);
-  }
-  */
-  // bruk drevsenter ?
-  //ownPosition = pos_center;  
-  /*
-       bytt til '?'
-  */
- nopos = true;
-
-  updCount = updCount + 1;
-	
-  setText('gpsStatus', "upd="+updCount+"," + "gotPosFailed:" + error.message);
-  setText('gpsPos',"?");  
-  setText('gpsAccu', "?");  
-  setText('gpsAge', "?");
-  
-  own_marker.setIcon('yellow.png');
-  
-}
-
-function setText(elem, txt)
-{
-	//alert("e" + elem + "-" + txt);
-	
-	if (document.getElementById(elem) && document.getElementById(elem).innerHTML) 
-	   document.getElementById(elem).innerHTML = txt;
-}
-function setValue(elem, v)
-{
-	//alert("e" + elem + "-" + txt);
-	
-	if (document.getElementById(elem)) 
-	   document.getElementById(elem).value = v;
-}
-
-function setOppdatertTid(posTime) {
-	setText('gpsAge', ("0" + posTime
-			.getHours())
-		.slice(-2) + ":" + ("0" + posTime
-			.getMinutes())
-		.slice(-2) + ":" + ("0" + posTime
-			.getSeconds())
-		.slice(-2));
-
-
-}
-
-
-function positionUpdateFromWatch(position) 
-{
-  
-  ownPosition = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
-  ownAccuracy = position.coords.accuracy;
-  var posTime = new Date(position.timestamp);
-  
-  
-    if (nopos === true)
-  {
-    nopos = false;
-  }
-
-  
-  if (autoSentrer === undefined || autoSentrer === 1)
-  {
-    // flytt markør
-    own_marker.setPosition(ownPosition);
-
-    // flytt sirkel, set radius & farge
-    own_circle.setCenter(ownPosition);
-    own_circle.setRadius(position.coords.accuracy);
-
-    if (position.coords.accuracy > 100.0){
-      own_circle.setOptions({strokeColor: '#FF0000'});  //red
-    }
-    else if (position.coords.accuracy > 50.0){
-      own_circle.setOptions({strokeColor: 'yellow'});
-    }
-    else if (position.coords.accuracy > 25.0){
-      own_circle.setOptions({strokeColor: '#00AA00'});  // dark green
-    }
-    else {//if (position.coords.accuracy > 0){
-      own_circle.setOptions({strokeColor: 'green'});
-    } 
-
-  }
-  
-	
-
-  	// lagre i historien
-	if (hale.getPath().length > 50)
-		hale.getPath().removeAt(0);
-	
-	hale.getPath().push(ownPosition);	
-  
-  
-  updCount = updCount + 1;
-  setText('gpsStatus', "upd="+updCount+"," + "updFromWatchOK");
-  //setText('gpsPos', "lat: " + position.coords.latitude + ", lon: " +position.coords.longitude);  
-  //setText('gpsPos', "xlatx: " + ownPosition.latitude + ", lon: " +ownPosition.longitude);
-  setText('gpsPos', "ylatx: " + ownPosition.lat() + ", lon: " +ownPosition.lng());
-  setText('gpsAccu', position.coords.accuracy);  
-  //setText('gpsAge', posTime.getHours() +":" + posTime.getMinutes() +":" + posTime.getSeconds() + " (" + age + "ms )");
-  setOppdatertTid(posTime);
-  
-  
-  if (sendPosUpdates !== undefined && sendPosUpdates  > 0)
-  {
-      var now = new Date();
-    var diff = now - lastPosSent;
-    
-      if (diff > 10000)
-    {
-        TESTSEND();
-        lastPosSent = posTime;
-        setText('userid', "sendt"); 
-    }
-    else
-    {
-        setText('userid', "ikke enda " + diff); 
-    }
-  }
-          
-  
-  
-}
-
-
-function positionUpdateFailed(error) 
-{ 
-  /* oppdatering feilet 
-     dvs ingen ny pos i tiden ...
-     bytt til '?'
-     
-  */
- nopos = true;
-  
-  updCount = updCount + 1;
-  setText('gpsStatus', "upd="+updCount+"," + "updFromWatchFailed:" + error.message);  
-  
-  //setOppdatertTid(posTime);
-  
-  own_marker.setIcon('yellow.png');
-  own_circle.setOptions({strokeColor: '#FF0000'});
-  
-}
-
-
-function getOwnPosition() {  
-	setText('gpsStatus', "leter etter gps");
-  // Try W3C Geolocation 
-  
-  if(navigator.geolocation) 
-  {  
-    navigator.geolocation.getCurrentPosition(
-      gotPositionOK, 
-      gotPositionFailed,
-      {enableHighAccuracy:true, maximumAge:30000, timeout:30000}
-    );                     
-  } else {
-    // Browser doesn't support Geolocation
-    setText('gpsStatus',  "GPS virker ikke ?");  
-    alert("Kan ikke få GPS pos, er det skrudd av ?" );
-
-	// fjern fra kart  
-    if(own_marker)
-    {
-      own_marker.setMap(null);
-    }
-    if(own_circle)
-    {
-      own_circle.setMap(null);
-    }
-    // bruk drevsenter    
-    ownPosition = pos_center;  
-    ownAccuracy = 1000;
-  }    
-    
-}
-
-
-/*
-
-*/
-function initialize() {
-
-	setText('gpsStatus', "start init");
-
-	setValue('userid', ownNavn);
-        
-        
-/* set navigerings stil for maps
-*/
-  var useragent = navigator.userAgent;
-  var myStyle;
-
-  if (useragent.indexOf('iPhone') != -1) {
-    myStyle = google.maps.NavigationControlStyle.SMALL;
-  } else if (useragent.indexOf('Android') != -1 ) {
-    myStyle = google.maps.NavigationControlStyle.ANDROID;    
-  } else {
-    myStyle = google.maps.NavigationControlStyle.DEFAULT;  // DEFAULT, SMALL, ZOOM_PAN    
-  } 
-    
-  map = new google.maps.Map(document.getElementById("mapCanvas"),
-                {
-                zoom: zoom_level,
-                center: pos_center,
-                scaleControl : true,
-                navigationControlOptions: {
-                  style: myStyle
-                },
-                mapTypeControlOptions: {
-                  mapTypeIds: ['topo2',google.maps.MapTypeId.SATELLITE, 'europa'],
-                  style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
-                  }
-                });
-
-  map.mapTypes.set('topo2',new StatkartMapType("Kart", "topo2"));
-  
-  
-  /*
-  //flere kart i meny:
-  mapTypeIds: ['kartdata2', 'sjo_hovedkart2', 'topo2', 'topo2graatone', 'toporaster2', 'europa',google.maps.MapTypeId.SATELLITE],
-                 
-  
-  map.mapTypes.set('sjo_hovedkart2',new StatkartMapType("Sjo hovedkart", "sjo_hovedkart2"));
-  map.mapTypes.set('kartdata2',new StatkartMapType("Kartdata 2", "kartdata2"));
-  map.mapTypes.set('topo2graatone',new StatkartMapType("Graatone", "topo2graatone"));
-  map.mapTypes.set('toporaster2',new StatkartMapType("Toporaster", "toporaster2"));
-  */
-  map.mapTypes.set('europa',new StatkartMapType("Europa", "europa"));
-
-  // default maptype
-  map.setMapTypeId('topo2');
-
-  // lag "buttons"	
-  var homeControlDiv = document.createElement('HOMEDIV');
-  var homeControl = new HomeControl(homeControlDiv, map);
-  homeControlDiv.index = 1;
-  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(homeControlDiv);  
-    
-  var drevControlDiv = document.createElement('DREVDIV');
-  var drevControl = new DrevControl(drevControlDiv, map);
-  drevControlDiv.index = 2;
-  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(drevControlDiv);  
-
-
-  /* Legg ut postene */
-	setText('gpsStatus', "legger ut poster");
-  var n;                  
-  for (n=1; n <=num_poster; n++)
-  {
-    var marker_post = new google.maps.Marker({
-                        position: post_pos[n-1],
-                        map:map,
-                        icon:'marker'+n+'.png'}
-                      ); 
-  }                         
-
-  
-  /* Legg ut grensen */
-	setText('gpsStatus', "legger ut grenser");
 /*
 pkt 1: fra 
 */
@@ -727,6 +279,459 @@ pkt_grense3
 ];
 
 
+/*
+*/
+function StatkartMapType(name, layer) {
+  this.layer = layer;
+  this.name = name;
+  this.alt = name;
+
+  this.tileSize = new google.maps.Size(256,256);
+  this.maxZoom = 19;
+  this.getTile = function(coord, zoom, ownerDocument) {
+      var div = ownerDocument.createElement('DIV');
+      div.style.width = this.tileSize.width + 'px';
+      div.style.height = this.tileSize.height + 'px';
+      div.style.backgroundImage = "url(http://opencache.statkart.no/gatekeeper/gk/gk.open_gmaps?layers=" + this.layer + "&zoom=" + zoom + "&x=" + coord.x + "&y=" + coord.y + ")";
+      return div;
+    };
+}
+
+      
+
+/*
+   handler for knapp - EgenPos
+*/
+function HomeControl(controlDiv, map) {
+
+  // Set CSS styles for the DIV containing the control
+  // Setting padding to 5 px will offset the control
+  // from the edge of the map
+  controlDiv.style.padding = '5px';
+
+  // Set CSS for the control border
+  var controlUI = document.createElement('HOMEDIV');
+  controlUI.style.backgroundColor = 'white';
+  controlUI.style.borderStyle = 'solid';
+  controlUI.style.borderWidth = '2px';
+  controlUI.style.cursor = 'pointer';
+  controlUI.style.textAlign = 'center';
+  controlUI.title = 'Klikk for &aring; sentrere p&aring; egen pos';
+  controlDiv.appendChild(controlUI);
+
+  // Set CSS for the control interior
+  var controlText = document.createElement('HOMEDIV');
+  controlText.style.fontFamily = 'Arial,sans-serif';
+  controlText.style.fontSize = '12px';
+  controlText.style.paddingLeft = '4px';
+  controlText.style.paddingRight = '4px';
+  controlText.innerHTML = '<b>Egen pos</b>';
+  controlUI.appendChild(controlText);
+
+  // Setup the click event listeners: simply set the map to
+  // Chicago
+  google.maps.event.addDomListener(controlUI, 'click', function() {
+
+    logText("egen pos");
+    map.setCenter(ownPosition);
+  });
+
+}
+
+/*
+   handler for knapp - Drev
+*/
+function DrevControl(controlDiv, map) {
+
+  // Set CSS styles for the DIV containing the control
+  // Setting padding to 5 px will offset the control
+  // from the edge of the map
+  controlDiv.style.padding = '5px';
+
+  // Set CSS for the control border
+  var controlUI = document.createElement('DREVDIV');
+  controlUI.style.backgroundColor = 'white';
+  controlUI.style.borderStyle = 'solid';
+  controlUI.style.borderWidth = '2px';
+  controlUI.style.cursor = 'pointer';
+  controlUI.style.textAlign = 'center';
+  controlUI.title = 'Klikk for &aring; sentrere p&aring; drev';
+  controlDiv.appendChild(controlUI);
+
+  // Set CSS for the control interior
+  var controlText = document.createElement('DREVDIV');
+  controlText.style.fontFamily = 'Arial,sans-serif';
+  controlText.style.fontSize = '12px';
+  controlText.style.paddingLeft = '4px';
+  controlText.style.paddingRight = '4px';
+  controlText.innerHTML = '<b>Senter</b>';
+  controlUI.appendChild(controlText);
+
+  // Setup the click event listeners: simply set the map to
+  // Chicago
+  google.maps.event.addDomListener(controlUI, 'click', function() {
+    logText("drev");
+    map.setCenter(pos_center);
+    map.setZoom(zoom_level);
+  });
+
+}
+
+/*
+*/
+function gotPositionOK(position) {
+  // got a position  
+  
+  ownPosition = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+  ownAccuracy = position.coords.accuracy;
+          
+  var posTime = new Date(position.timestamp);
+
+  if (autoSentrer === undefined || autoSentrer === 1)
+  {
+      logText("AutoSentrer egen pos");
+    // flytt marker dit (ble satt til center først)
+    own_marker.setPosition(ownPosition);
+
+    // flytt circle and update radius & color
+    own_circle.setCenter(ownPosition);
+
+   // set egen plass midt på kart
+    map.setCenter(ownPosition);
+  }
+  
+  own_circle.setRadius(position.coords.accuracy);
+
+  if (nopos === true)
+  {
+    nopos = false;
+  }
+
+  
+  
+  setText('gpsStatus', "upd="+updCount+"," + "gotPosOK");
+  setText('gpsPos', "lat,lon: " + ownPosition.lat() + ", " +ownPosition.lng());
+  //tText('gpsAccu').innerHTML = position.coords.accuracy;  
+  setOppdatertTid(posTime);
+  
+
+/*
+	hale
+*/
+	if (hale === undefined)
+	{
+		var linjefarge = "#E01BE0";
+		var tykkelse = 3;
+		hale = new google.maps.Polyline({
+			strokeColor : linjefarge,
+			strokeOpacity : 1.0,
+			map : map,
+			strokeWeight : tykkelse
+		});
+	}
+	else
+	{
+		hale.getPath().clear();
+	}
+         
+  // cancel any old watcher       
+  if(updateLocation !== null)
+  {
+    navigator.geolocation.clearWatch(updateLocation);  
+  }  
+  
+  // start watching      
+  updateLocation = navigator.geolocation.watchPosition(
+    positionUpdateFromWatch, 
+    positionUpdateFailed,
+    {enableHighAccuracy:true, maximumAge:30000, timeout:30000});               
+}
+
+
+function gotPositionFailed(error) {
+  /* første get etter klikk feilet, typisk timeout 
+     watch er ikke startet ?
+     
+     
+     
+  */
+
+/*  if(own_marker)
+  {
+    own_marker.setMap(null);
+  }
+  if(circle)
+  {
+    own_circle.setMap(null);
+  }
+  */
+  // bruk drevsenter ?
+  //ownPosition = pos_center;  
+  /*
+       bytt til '?'
+  */
+ nopos = true;
+
+  updCount = updCount + 1;
+	
+  setText('gpsStatus', "upd="+updCount+"," + "gotPosFailed:" + error.message);
+  setText('gpsPos',"?");  
+  setText('gpsAccu', "?");  
+  setText('gpsAge', "?");
+  
+  
+}
+
+function setText(elem, txt)
+{
+	//alert("e" + elem + "-" + txt);
+	
+	if (document.getElementById(elem) && document.getElementById(elem).innerHTML) 
+	   document.getElementById(elem).innerHTML = txt;
+}
+function setValue(elem, v)
+{
+	//alert("e" + elem + "-" + txt);
+	
+	if (document.getElementById(elem)) 
+	   document.getElementById(elem).value = v;
+}
+
+function getTimeString(posTime) {
+	return(( "0" + posTime.getHours()).slice(-2) 
+	     + ":" + ("0" + posTime.getMinutes()).slice(-2) 
+	     + ":" + ("0" + posTime.getSeconds()).slice(-2));
+}
+
+function setOppdatertTid(posTime) {
+	setText('gpsTime', getTimeString(posTime));
+}
+
+
+function positionUpdateFromWatch(position) 
+{
+  
+  ownPosition = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+  ownAccuracy = position.coords.accuracy;
+  var posTime = new Date(position.timestamp);
+  
+  
+    if (nopos === true)
+  {
+    nopos = false;
+  }
+
+  
+  if (autoSentrer === undefined || autoSentrer === 1)
+  {
+    // flytt markør
+    own_marker.setPosition(ownPosition);
+
+    // flytt sirkel, set radius & farge
+    own_circle.setCenter(ownPosition);
+    own_circle.setRadius(position.coords.accuracy);
+
+    if (position.coords.accuracy > 100.0){
+      own_circle.setOptions({strokeColor: '#FF0000'});  //red
+    }
+    else if (position.coords.accuracy > 50.0){
+      own_circle.setOptions({strokeColor: 'yellow'});
+    }
+    else if (position.coords.accuracy > 25.0){
+      own_circle.setOptions({strokeColor: '#00AA00'});  // dark green
+    }
+    else {//if (position.coords.accuracy > 0){
+      own_circle.setOptions({strokeColor: 'green'});
+    } 
+
+  }
+  
+	
+
+  	// lagre i historien
+	if (hale.getPath().length > 50)
+		hale.getPath().removeAt(0);
+	
+	hale.getPath().push(ownPosition);	
+  
+  
+  updCount = updCount + 1;
+  setText('gpsStatus', "upd="+updCount+"," + "updFromWatchOK");
+  setText('gpsPos', "lat,lon: " + ownPosition.lat() + ", " +ownPosition.lng());
+  setText('gpsAccu', position.coords.accuracy);  
+  setOppdatertTid(posTime);
+  
+  
+  if (sendPosUpdates !== undefined && sendPosUpdates  > 0)
+  {
+      var now = new Date();
+    var diff = now - lastPosSent;
+    
+      if (diff > 10000)
+    {
+        onTimerSendOwnPos();
+        lastPosSent = posTime;
+        setText('userid', "sendt"); 
+    }
+    else
+    {
+        setText('userid', "ikke enda " + diff); 
+    }
+  }
+          
+  
+  
+}
+
+
+function positionUpdateFailed(error) 
+{ 
+  /* oppdatering feilet 
+     dvs ingen ny pos i tiden ...
+     bytt til '?'
+     
+  */
+ nopos = true;
+  
+  updCount = updCount + 1;
+  setText('gpsStatus', "upd="+updCount+"," + "updFromWatchFailed:" + error.message);  
+  
+  //setOppdatertTid(posTime);
+  
+  own_circle.setOptions({strokeColor: '#FF0000'});
+  
+}
+
+
+function getOwnPosition() {  
+	setText('gpsStatus', "leter etter gps");
+  // Try W3C Geolocation 
+  
+  if(navigator.geolocation) 
+  {  
+    navigator.geolocation.getCurrentPosition(
+      gotPositionOK, 
+      gotPositionFailed,
+      {enableHighAccuracy:true, maximumAge:30000, timeout:30000}
+    );                     
+  } else {
+    // Browser doesn't support Geolocation
+    setText('gpsStatus',  "GPS virker ikke ?");  
+    alert("Kan ikke få GPS pos, er det skrudd av ?" );
+
+	// fjern fra kart  
+    if(own_marker)
+    {
+      own_marker.setMap(null);
+    }
+    if(own_circle)
+    {
+      own_circle.setMap(null);
+    }
+    // bruk drevsenter    
+    ownPosition = pos_center;  
+    ownAccuracy = 1000;
+  }    
+    
+}
+
+
+/*
+
+*/
+function initialize() {
+
+	setText('gpsStatus', "start init");
+
+	setText('svar', "Fjerner personer etter " + aldersgrense/(3600*1000) + " timer");
+
+	ownNavn = localStorage.getItem("jaktNavn");
+	//ownGruppe = localStorage.getItem("jaktGruppe");
+
+        //if (ownNavn === undefined || ownNavn.length < 1)
+        {
+           var person = prompt("Hvem er du?", ownNavn);
+           if (person != null) {
+             ownNavn = person;
+             localStorage.setItem("jaktNavn", ownNavn);
+	   }
+         }       
+	setValue('userid', ownNavn);
+        
+/* set navigerings stil for maps
+*/
+  var useragent = navigator.userAgent;
+  var myStyle;
+
+  if (useragent.indexOf('iPhone') != -1) {
+    myStyle = google.maps.NavigationControlStyle.SMALL;
+  } else if (useragent.indexOf('Android') != -1 ) {
+    myStyle = google.maps.NavigationControlStyle.ANDROID;    
+  } else {
+    myStyle = google.maps.NavigationControlStyle.DEFAULT;  // DEFAULT, SMALL, ZOOM_PAN    
+  } 
+    
+  map = new google.maps.Map(document.getElementById("mapCanvas"),
+                {
+                zoom: zoom_level,
+                center: pos_center,
+                scaleControl : true,
+                navigationControlOptions: {
+                  style: myStyle
+                },
+                mapTypeControlOptions: {
+                  mapTypeIds: ['topo2',google.maps.MapTypeId.SATELLITE, 'europa'],
+                  style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+                  }
+                });
+
+  map.mapTypes.set('topo2',new StatkartMapType("Kart", "topo2"));
+  
+  
+  /*
+  //flere kart i meny:
+  mapTypeIds: ['kartdata2', 'sjo_hovedkart2', 'topo2', 'topo2graatone', 'toporaster2', 'europa',google.maps.MapTypeId.SATELLITE],
+                 
+  
+  map.mapTypes.set('sjo_hovedkart2',new StatkartMapType("Sjo hovedkart", "sjo_hovedkart2"));
+  map.mapTypes.set('kartdata2',new StatkartMapType("Kartdata 2", "kartdata2"));
+  map.mapTypes.set('topo2graatone',new StatkartMapType("Graatone", "topo2graatone"));
+  map.mapTypes.set('toporaster2',new StatkartMapType("Toporaster", "toporaster2"));
+  */
+  map.mapTypes.set('europa',new StatkartMapType("Europa", "europa"));
+
+  // default maptype
+  map.setMapTypeId('topo2');
+
+  // lag "buttons"	
+  var homeControlDiv = document.createElement('HOMEDIV');
+  var homeControl = new HomeControl(homeControlDiv, map);
+  homeControlDiv.index = 1;
+  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(homeControlDiv);  
+    
+  var drevControlDiv = document.createElement('DREVDIV');
+  var drevControl = new DrevControl(drevControlDiv, map);
+  drevControlDiv.index = 2;
+  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(drevControlDiv);  
+
+
+  /* Legg ut postene */
+	setText('gpsStatus', "legger ut poster");
+  var n;                  
+  for (n=1; n <=num_poster; n++)
+  {
+    var marker_post = new google.maps.Marker({
+                        position: post_pos[n-1],
+                        map:map,
+                        icon:'marker'+n+'.png'}
+                      ); 
+  }                         
+
+  
+  /* Legg ut grensen */
+	setText('gpsStatus', "legger ut grenser");
+
+
 var linjefarge = "#E01BE0";
 var tykkelse = 3;
   
@@ -747,12 +752,16 @@ for(gn=0;gn<num_grenser;gn++)
 
 	setText('gpsStatus', "start i senter");
   // lag egen markør - midt i kartet  
-  own_marker = new google.maps.Marker({
-                    position: pos_center,
-                    map:map,
-                    icon: 'blue.png'
-                    }
-                  ); 
+                    own_marker = new MarkerWithLabel({
+                        position: pos_center,
+                        map:map,
+                        icon: "blue.png",                        
+                        title : ownNavn ,
+			labelAnchor: new google.maps.Point(20,50),
+			labelClass: "plabel",
+			labelContent: ownNavn,
+			labelStyle: {opacity: 0.75}
+			}); 
                     
   own_circle = new google.maps.Circle({center:pos_center,
                                    radius: 1000,
@@ -820,68 +829,10 @@ function logText(intxt)
 
 
 
-/* 
-$Revision: 12 $
-$Date: 2013-10-14 18:49:40 +0200 (Mon, 14 Oct 2013) $
-
-   -timertask som oppdaterer age ?
-   -append pos to polyline
-   -adjust maxage ? timeout + accu
-   
-
-*/
-
-function PostData() {
-	
-    alert("post 1");
-	
-    // 1. Create XHR instance - Start
-    var xhr;
-    if (window.XMLHttpRequest) {
-        xhr = new XMLHttpRequest();
-    }
-    else if (window.ActiveXObject) {
-        xhr = new ActiveXObject("Msxml2.XMLHTTP");
-    }
-    else {
-        throw new Error("Ajax is not supported by this browser");
-    }
-    // 1. Create XHR instance - End
-    
-	//alert("post 2");
-    // 2. Define what to do when XHR feed you the response from the server - Start
-    xhr.onreadystatechange = function () {
-    	 
-    	    //alert("ready: " + xhr.readyState);
-    	    
-        if (xhr.readyState === 4) {
-        	alert("ready: status " + xhr.status);
-            if (xhr.status == 200 && xhr.status < 300) {
-                document.getElementById('div1').innerHTML = xhr.responseText;
-            }
-        }
-    }
-
-    // 2. Define what to do when XHR feed you the response from the server - Start
-
-    userid = document.getElementById("userid").value;
-
-    //alert("post 3");
-
-    // 3. Specify your action, location and Send to the server - Start 
-    xhr.open('POST', 'submit.php');
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    xhr.send("userid=" + userid);    
-    // 3. Specify your action, location and Send to the server - End
-    
-    	alert("sendt");
-
-    
-}
-
 function setUserId()
 {
      ownNavn = document.getElementById("userid").value;
+     localStorage.setItem("jaktNavn", ownNavn);
 }
 
 function SendPost() {
@@ -927,13 +878,29 @@ function SendPost() {
     
 }
 
-function TESTSEND()
+function onKlikkSendOwnPos()
 {
   if (ownPosition !== undefined )
   {
-      if (ownAccuracy > 50)
+      if (ownNavn === undefined || ownNavn.length < 1)
       {
-          logText("Lav accuracy, lagrer ikke");
+          setText(gpsStatus, "Ikke navn, lagrer ikke");
+	  return;
+      }
+        var pos = new Posisjon(ownNavn, ownGruppe, ownPosition.lat(), ownPosition.lng());
+        sendPosisjon(pos);
+  }	 
+  else
+    logText("ownPosition undef");
+}
+
+function onTimerSendOwnPos()
+{
+  if (ownPosition !== undefined )
+  {
+      if (ownNavn === undefined || ownNavn.length < 1)
+      {
+          logText("Ikke navn, lagrer ikke");
           return;
       }
         var pos = new Posisjon(ownNavn, ownGruppe, ownPosition.lat(), ownPosition.lng());
@@ -1009,7 +976,7 @@ function onKlikkLesPosisjoner()
 
 
     logText("henter posisjoner");
-    getPosisjoner("buer1");
+    getPosisjoner(ownGruppe);
     
     return false;
 }
@@ -1031,14 +998,21 @@ function getPosisjoner(gruppe)
 /*
  * can pass maxage etc
  */    
-    
-    var jsonstring = JSON.stringify(gruppe, replacer);
+   var g = new Gruppe(gruppe);
+
+    var jsonstring = JSON.stringify(g, replacer);
 
     $.ajax({
         type: "POST",
         url: "getPos.php",
         data: {json: jsonstring},
         success: function(data) {
+	    if (data === undefined || data.pos === undefined)
+	    {
+               logText('ingen posisjoner');
+	       return;
+            }
+
             logText('lest inn ' + data.pos.length + ' posisjoner');
 
             if (posliste)
@@ -1055,6 +1029,7 @@ function getPosisjoner(gruppe)
             posliste = new Array();
             
             var now = new Date();
+	    var navneliste = "";
 
             for (var n=0 ; n<data.pos.length; n++)
             {
@@ -1078,7 +1053,7 @@ if (navn==ownNavn)
 		     continue;
                   }
 
-                   tidstr = "" + ptime;
+                   tidstr = getTimeString(ptime);
                 }
 		else
                    tidstr = "";
@@ -1092,17 +1067,20 @@ if (navn==ownNavn)
 
                 if (p !== undefined)
                 {
-                    logText(navn + ":" + p.lat() + "/" + p.lng());
+                    logText(navn + ":" + tidstr + ":" + p.lat() + "/" + p.lng());
                     var m = new MarkerWithLabel({
                         position: p,
                         map:map,
-                        icon: "blue.png",                        
+                        icon: "red.png",                        
                         title : "" + navn + ' kl ' + tidstr,
-			labelAnchor: new google.maps.Point(3,30),
-			labelContent: navn
+			labelAnchor: new google.maps.Point(20,50),
+			labelClass: "plabel",
+			labelContent: navn,
+			labelStyle: {opacity: 0.75}
 			}); 
               
                    posliste.push(m);
+		   navneliste = navneliste + "<br/>-" + navn + " sist lagret " + tidstr;
                 }
                 else
                 {
@@ -1110,7 +1088,10 @@ if (navn==ownNavn)
                 }
                 
             }
-            
+
+            antallPos=posliste.length;
+	    setText('personer', antallPos + " personer oppdatert " + getTimeString(now) + ""+ navneliste);
+
             getInProgress = 0;
 
             return true;
@@ -1183,7 +1164,7 @@ var mytimer = (function() {
         if (visAndre > 0)
         {
             var now = new Date();    
-            if ( now - lastGetTime > 3000)
+            if ( now - lastGetTime > getInterval)
             {
                 // hent hvert minutt
                 getPosisjoner(ownGruppe);   

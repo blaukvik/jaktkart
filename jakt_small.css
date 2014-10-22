@@ -3,6 +3,18 @@ margin:0px;
 height:100%; /* this is the key! */ 
 }   
 
+.plabel {
+     color: red;
+     background-color: white;
+font-family: "Lucida Grande", "Arial", sans-serif;
+font-size: 10px;
+font-weight: bold;
+text-align: center;
+width: 40px;     
+border: 2px solid black;
+white-space: nowrap;
+}
+
 /* default is canvas top left, info top right
    but this is changed for phones
  */ 

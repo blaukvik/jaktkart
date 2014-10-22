@@ -1,23 +1,33 @@
 <!DOCTYPE html>
 <html>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <head>
-<title>Drev 6 - Buskalet: Fra Ideb�enveien til Engkasa</title>
+<title>Drev 6 - Buskalet: Fra Idebøenveien til Engkasa</title>
 
-<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+
 <script type="text/javascript"
     src="http://maps.google.com/maps/api/js?sensor=false">
 </script>
 
+<script type="text/javascript" src="Posisjon.js"></script>
+<script type="text/javascript" src="markerwithlabel.js"></script>
+<script type="text/javascript" src="jaktkart.js"></script>
+
 <link rel="stylesheet" media="screen and (min-device-width: 801px)" type="text/css" href="jakt.css" />
 <LINK rel="stylesheet" media="screen and (max-device-width: 800px)" type="text/css" href="jakt_small.css">
 
-<script type="text/javascript" src="jaktkart.js"></script>
-
 <script type="text/javascript">
 
-var pos_center   = new google.maps.LatLng(59.01774, 11.49637);
-var zoom_level = 15;
-var num_poster = 13;
+visEgenPos = 1;
+autoSentrer = 1;
+runTimer = 1;
+visAndre = 1;
+ownGruppe='buerjakt';
+
+pos_center   = new google.maps.LatLng(59.01774, 11.49637);
+zoom_level = 15;
+num_poster = 13;
 
 
 var post_pos = [
@@ -47,7 +57,7 @@ google.maps.event.addDomListener(window, 'load', initialize);
   <div id="mapCanvas"></div> 
   <div id="infoPanel"> 
   <br>
-    <b>Drev 6: Buskalet</b> <br> Fra Ideb�enveien til Engkasa
+    <b>Drev 6: Buskalet</b> <br> Fra Idebøenveien til Engkasa
   <br>
   <br>
   <table cellspacing="0" cellpadding="10 em" border="2">
@@ -63,50 +73,59 @@ google.maps.event.addDomListener(window, 'load', initialize);
   <td>2</td><td>Eika</td><td>Litt nord for Eika</td>
   </tr>
   <tr>
-  <td>3</td><td>�ya</td><td>P� jordet mellom �ivind og Johan</td>
+  <td>3</td><td>Øya</td><td>På jordet mellom Øivind og Johan</td>
   </tr>
   <tr>
-  <td>4</td><td>Reveb�sen</td><td>P� �stsiden, midt p� �ya</td>
+  <td>4</td><td>Revebåsen</td><td>På østsiden, midt på Øya</td>
   </tr>
   <tr>
-  <td>5</td><td>Halgrimsb�en</td><td>P� fjellet ved oppgangen til �sane</td>
+  <td>5</td><td>Halgrimsbøen</td><td>På fjellet ved oppgangen til Åsane</td>
   </tr>
   <tr>
-  <td>6</td><td>Sagholen</td><td>I veien ca 50 m fra toppen. G�r med i drevet</td>
+  <td>6</td><td>Sagholen</td><td>I veien ca 50 m fra toppen. Går med i drevet</td>
   </tr>
   <tr>
-  <td>7</td><td>Bakketopp</td><td>P� bakketopp ved skogshj�rne</td>
+  <td>7</td><td>Bakketopp</td><td>På bakketopp ved skogshjørne</td>
   </tr>
   <tr>
-  <td>8</td><td>Bj�rk</td><td>Ved bj�rk i veien ved haven</td>
+  <td>8</td><td>Bjørk</td><td>Ved bjørk i veien ved haven</td>
   </tr>
   <tr>
-  <td>9</td><td>Slahaugen</td><td>Ved bj�rk  p� �kerholme ved vei til Engkasa</td>
+  <td>9</td><td>Slahaugen</td><td>Ved bjørk  på åkerholme ved vei til Engkasa</td>
   </tr>
   <tr>
   <td>10</td><td>Elva</td><td>I skogen ved elva, ca 60 m nord for jordet</td>
   </tr>
   <tr>
-  <td>11</td><td>Engkasa 1</td><td>P� vestsiden av jordet, ca 80 m syd</td>
+  <td>11</td><td>Engkasa 1</td><td>På vestsiden av jordet, ca 80 m syd</td>
   </tr>
   <tr>
-  <td>12</td><td>Engkasa 2</td><td>P� vestsiden av jordet, ca midt p�</td>
+  <td>12</td><td>Engkasa 2</td><td>På vestsiden av jordet, ca midt på</td>
   </tr>
   <tr>
   <td>13</td><td>Engkasa 3</td><td>Ved sydvestspissen av jordet</td>
   </tr>
   </table>
-  <br>
-    <b>Egen pos:</b>  <div id="gpsPos" style="display:inline;">POS:</div> 
-  <br>
-    <b>Accuracy:</b>  <div id="gpsAccu" style="display:inline;">XX</div> meter
-  <br>
-    <b>Speed:</b>  <div id="gpsSpeed" style="display:inline;">XX</div> m/s
-  <br>
-    <b>Oppdatert</b>  <div id="gpsAge" style="display:inline;">XX</div> m/s
-  <br>
-    <b>Stat</b>  <div id="gpsStatus" style="display:inline;">XX</div> m/s
-  
+  <br/>
+  <b>Oppdatert:</b>  <div id="gpsTime" style="display:inline;">ikke f&aring;tt posisjon enda</div>
+  <br/>
+<b>Status:</b>  <div id="gpsStatus" style="display:inline;">ikke begynt</div>
+<br/>
+<b>Pos:</b>  <div id="gpsPos" style="display:inline;">ikke begynt</div>
+
+
+<div id="cmdPanel">
+<br/>
+<input type="button" value ="Les posisjoner" onclick="onKlikkLesPosisjoner()" />
+
+<input type="button" value ="Send posisjon" onclick="onKlikkSendOwnPos()" />
+
+<br/>
+<div id="svar" style="display:inline;">svar</div>
+<br/>
+<div id="personer" style="display:inline;">Ingen andre</div>
+
+</div>
   </div> 
   <div id="footer">
   <a href="http://www.statkart.no">Statens kartverk</a>, <a href="http://www.statkart.no/nor/Land/Fagomrader/Geovekst/">Geovekst</a> og <a href="http://www.statkart.no/?module=Articles;action=Article.publicShow;ID=14194">kommuner</a>

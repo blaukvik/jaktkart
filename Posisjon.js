@@ -1,3 +1,7 @@
+function Gruppe(navn)
+{
+  this.gruppe=navn;
+}
 
 function Posisjon(navn, gruppe, lat, lon)
 {

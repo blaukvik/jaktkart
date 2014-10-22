@@ -1,6 +1,6 @@
 /**
  * @name MarkerWithLabel for V3
- * @version 1.1.8 [February 26, 2013]
+ * @version 1.1.10 [April 8, 2014]
  * @author Gary Little (inspired by code from Marc Ridey of Google).
  * @copyright Copyright 2012 Gary Little [gary at luxcentral.com]
  * @fileoverview MarkerWithLabel extends the Google Maps JavaScript API V3
@@ -36,6 +36,21 @@
 /*global document,google */
 
 /**
+ * @param {Function} childCtor Child class.
+ * @param {Function} parentCtor Parent class.
+ * @private
+ */
+function inherits(childCtor, parentCtor) {
+  /* @constructor */
+  function tempCtor() {}
+  tempCtor.prototype = parentCtor.prototype;
+  childCtor.superClass_ = parentCtor.prototype;
+  childCtor.prototype = new tempCtor();
+  /* @override */
+  childCtor.prototype.constructor = childCtor;
+}
+
+/**
  * This constructor creates a label and associates it with a marker.
  * It is for the private use of the MarkerWithLabel class.
  * @constructor
@@ -66,8 +81,7 @@ function MarkerLabel_(marker, crossURL, handCursorURL) {
   this.crossDiv_ = MarkerLabel_.getSharedCross(crossURL);
 }
 
-// MarkerLabel_ inherits from OverlayView:
-MarkerLabel_.prototype = new google.maps.OverlayView();
+inherits(MarkerLabel_, google.maps.OverlayView);
 
 /**
  * Returns the DIV for the cross used when dragging a marker when the
@@ -337,6 +351,7 @@ MarkerLabel_.prototype.setContent = function () {
     this.labelDiv_.innerHTML = ""; // Remove current content
     this.labelDiv_.appendChild(content);
     content = content.cloneNode(true);
+    this.eventDiv_.innerHTML = ""; // Remove current content
     this.eventDiv_.appendChild(content);
   }
 };
@@ -550,8 +565,7 @@ function MarkerWithLabel(opt_options) {
   google.maps.Marker.apply(this, arguments);
 }
 
-// MarkerWithLabel inherits from <code>Marker</code>:
-MarkerWithLabel.prototype = new google.maps.Marker();
+inherits(MarkerWithLabel, google.maps.Marker);
 
 /**
  * Overrides the standard Marker setMap function.
