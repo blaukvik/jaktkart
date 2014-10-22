@@ -5,7 +5,7 @@ header('Content-type: application/json; charset=utf-8');
 
   $log_dir = dirname( __FILE__ ) . '/logs/';
   //$log_name = "posts-" . $_SERVER['REMOTE_ADDR'] . "-" . date("Y-m-d-H") . ".log";
-  $log_name = "oapp_php.log";
+  $log_name = "pos.log";
   $fp=fopen( $log_dir . $log_name, 'a' );
 
 if ( isset($_POST) && is_array($_POST) && count($_POST) > 0 ) { 
@@ -30,7 +30,7 @@ else
   $log_entry = gmdate('r') . "jsongruppe= " . $jsongruppe . "\n";
   fputs($fp, $log_entry);
 
-  $jsongruppe = '{"gruppe":"buer1"}';
+  $jsongruppe = '{"gruppe":"test"}';
   $posquery = json_decode($jsongruppe);
 
 
@@ -50,7 +50,7 @@ if (!$db_selected)
 */
 
 
-$content = mysql_query("SELECT * FROM POSISJONER WHERE gruppe='buer1' ORDER BY tid ASC");
+$content = mysql_query("SELECT * FROM POSISJONER WHERE gruppe='$posquery->gruppe' ORDER BY tid ASC");
 if ($content == FALSE)
 {
   die('Query failed: ' . mysql_error());

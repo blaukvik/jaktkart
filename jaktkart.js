@@ -1,29 +1,36 @@
 
 /* 
-   -timertask som oppdaterer age ?
    -append pos to polyline
    -adjust maxage ? timeout + accu
-   
 
 */
+
+var pos_center;
+var zoom_level = 12;
+var num_poster = 0;
+
 
 var map;
 var own_marker;
 var own_circle;
 var ownPosition;
+var ownAccuracy;
 var visEgenPos;
+var visAndre;
+var aldersgrense = (1000 * 60 * 60 * 24);
 var autoSentrer;
 var runTimer;
+var ownNavn = 'Bla';
+var ownGruppe = 'test';
+var posliste;
 
 var hale;
-//var browserSupportFlag =  new Boolean();
-//var gotPosition =  new Boolean();
 var updateLocation ;
-//var lastposition;
 var updCount = 0;
 
 var nopos = false;
 
+var sendPosUpdates = 1;
 var lastPosSent = 0;
 
 /*
@@ -133,15 +140,15 @@ function DrevControl(controlDiv, map) {
 */
 function gotPositionOK(position) {
   // got a position  
-  //gotPosition = true;
-  //lastposition = position;
   
   ownPosition = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+  ownAccuracy = position.coords.accuracy;
+          
   var posTime = new Date(position.timestamp);
 
   if (autoSentrer === undefined || autoSentrer === 1)
   {
-      logText("AutoSentrer på egen pos");
+      logText("AutoSentrer egen pos");
     // flytt marker dit (ble satt til center først)
     own_marker.setPosition(ownPosition);
 
@@ -242,7 +249,13 @@ function setText(elem, txt)
 	
 	if (document.getElementById(elem) && document.getElementById(elem).innerHTML) 
 	   document.getElementById(elem).innerHTML = txt;
+}
+function setValue(elem, v)
+{
+	//alert("e" + elem + "-" + txt);
 	
+	if (document.getElementById(elem)) 
+	   document.getElementById(elem).value = v;
 }
 
 function setOppdatertTid(posTime) {
@@ -261,13 +274,8 @@ function setOppdatertTid(posTime) {
 function positionUpdateFromWatch(position) 
 {
   
-	//var now = new Date();
-  	//var age = now.getTime() - position.timestamp;
-
-  
-  //lastposition = position;
-  
   ownPosition = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+  ownAccuracy = position.coords.accuracy;
   var posTime = new Date(position.timestamp);
   
   
@@ -365,12 +373,9 @@ function positionUpdateFailed(error)
 function getOwnPosition() {  
 	setText('gpsStatus', "leter etter gps");
   // Try W3C Geolocation 
-  //gotPosition = false;
   
   if(navigator.geolocation) 
   {  
-    //browserSupportFlag = true;    
-    
     navigator.geolocation.getCurrentPosition(
       gotPositionOK, 
       gotPositionFailed,
@@ -378,7 +383,6 @@ function getOwnPosition() {
     );                     
   } else {
     // Browser doesn't support Geolocation
-    //browserSupportFlag = false;
     setText('gpsStatus',  "GPS virker ikke ?");  
     alert("Kan ikke få GPS pos, er det skrudd av ?" );
 
@@ -393,6 +397,7 @@ function getOwnPosition() {
     }
     // bruk drevsenter    
     ownPosition = pos_center;  
+    ownAccuracy = 1000;
   }    
     
 }
@@ -405,6 +410,9 @@ function initialize() {
 
 	setText('gpsStatus', "start init");
 
+	setValue('userid', ownNavn);
+        
+        
 /* set navigerings stil for maps
 */
   var useragent = navigator.userAgent;
@@ -771,9 +779,9 @@ else
     ///window.onload = function(){timer.start(10, 'timer');};
     if (runTimer === undefined || runTimer === 1)
     {
-        logText("runtimer er på, starter timer");
+        logText("runtimer, starter timer");
        
-        mytimer.start(10, 'timer') ;
+        mytimer.start(10000, 'timer') ;
     }
     else
     {
@@ -787,7 +795,9 @@ function logText(intxt)
 {
     var now = new Date();
     
-    var txt = now.getHours() + ":" + now.getMinutes()+ ":" + now.getSeconds() + ":" + intxt;
+    //var txt = now.getHours() + ":" + now.getMinutes()+ ":" + now.getSeconds() + ":" + intxt;
+   var txt = ("0" + now.getHours()).slice(-2) +":" + ("0" + now.getMinutes()).slice(-2) +":" + ("0" + now.getSeconds()).slice(-2);
+   txt = txt + ":" + intxt;
     
     if (console)
         console.log(txt);
@@ -823,7 +833,7 @@ $Date: 2013-10-14 18:49:40 +0200 (Mon, 14 Oct 2013) $
 
 function PostData() {
 	
-	//alert("post 1");
+    alert("post 1");
 	
     // 1. Create XHR instance - Start
     var xhr;
@@ -854,7 +864,7 @@ function PostData() {
 
     // 2. Define what to do when XHR feed you the response from the server - Start
 
-    var userid = document.getElementById("userid").value;
+    userid = document.getElementById("userid").value;
 
     //alert("post 3");
 
@@ -868,6 +878,12 @@ function PostData() {
 
     
 }
+
+function setUserId()
+{
+     ownNavn = document.getElementById("userid").value;
+}
+
 function SendPost() {
 	
 	//alert("post 1");
@@ -901,12 +917,12 @@ function SendPost() {
     }
 
     //alert("post 3");
-    var ownPositionTxt=document.getElementById("gpsPos").innerHTML;
+    var opt=document.getElementById("gpsPos").innerHTML;
 
     // Send pos til server 
     xhr.open('POST', 'submitPost.php');
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    xhr.send("drev=1&pos=" + ownPositionTxt);    
+    xhr.send("drev=1&pos=" + opt);    
 
     
 }
@@ -915,7 +931,12 @@ function TESTSEND()
 {
   if (ownPosition !== undefined )
   {
-        var pos = new Posisjon("Bard", "buer1", ownPosition.lat(), ownPosition.lng());
+      if (ownAccuracy > 50)
+      {
+          logText("Lav accuracy, lagrer ikke");
+          return;
+      }
+        var pos = new Posisjon(ownNavn, ownGruppe, ownPosition.lat(), ownPosition.lng());
         sendPosisjon(pos);
   }	 
   else
@@ -993,47 +1014,93 @@ function onKlikkLesPosisjoner()
     return false;
 }
 
+var     getInProgress = 0;
+
 function getPosisjoner(gruppe)
 {
-    logText("Hent");
+    
+    // her må det være en mutex
+    if (getInProgress > 0)
+    {
+       logText("Henter er i gang");
+        return;
+    }
+    
+    getInProgress = 1;
+
+/*
+ * can pass maxage etc
+ */    
+    
     var jsonstring = JSON.stringify(gruppe, replacer);
-    logText("jsonstring", jsonstring);
 
     $.ajax({
         type: "POST",
         url: "getPos.php",
         data: {json: jsonstring},
         success: function(data) {
-            logText('lest inn pos' + data);
+            logText('lest inn ' + data.pos.length + ' posisjoner');
 
-var posliste;
-
-        if (posliste)
-        {
-delete posliste;
-        }
+            if (posliste)
+            {
+                //logText("Sletter gamle");
+		for (var o=0; o<posliste.length;o++)
+		{
+		   posliste[o].setMap(null);
+		   //delete posliste[o];
+		}
+                delete posliste;
+            }
 
             posliste = new Array();
             
-            
-            
-var now = new Date();
+            var now = new Date();
 
-            var n=0;
-            while(data.pos[n])
+            for (var n=0 ; n<data.pos.length; n++)
             {
-                logText("navn " + data.pos[n].navn + " tid=" + new Date(data.pos[n].tid) );
+                var navn = data.pos[n].navn;
+
+if (navn==ownNavn)
+{
+  //logText("Tegner ikke egen");
+  continue;
+}
+                var tidstr;
+                
+                if (data.pos[n].tid !== undefined)
+		{
+		  var ptime=new Date(data.pos[n].tid);
+
+	          // 30 minutter
+		  if (now-ptime > aldersgrense)
+		  {
+		     logText("For gammel pos  " + navn + " " + ptime);
+		     continue;
+                  }
+
+                   tidstr = "" + ptime;
+                }
+		else
+                   tidstr = "";
+                       
+                if (navn === undefined)
+                    navn = "ukjent";
+                
 
                 var p = new google.maps.LatLng(data.pos[n].lat, data.pos[n].lon);
-                //var p = new google.maps.LatLng(data.pos[n].lon, data.pos[n].lat);
+                //var p = new google.maps.LatLng(data.pos[n].lon, data.pos[n].lat);  // bug i firefox ??
+
                 if (p !== undefined)
                 {
-                    logText(" p " + p.lat() + "/" + p.lng())
-                    var m = new google.maps.Marker({
+                    logText(navn + ":" + p.lat() + "/" + p.lng());
+                    var m = new MarkerWithLabel({
                         position: p,
                         map:map,
-                        icon:'yellow.png'}
-                      ); 
+                        icon: "blue.png",                        
+                        title : "" + navn + ' kl ' + tidstr,
+			labelAnchor: new google.maps.Point(3,30),
+			labelContent: navn
+			}); 
               
                    posliste.push(m);
                 }
@@ -1042,8 +1109,9 @@ var now = new Date();
                     logText("feil  med p " + data.pos[n].lat + "/" + data.pos[n].lon)
                 }
                 
-                n++;
             }
+            
+            getInProgress = 0;
 
             return true;
         },
@@ -1069,6 +1137,8 @@ var now = new Date();
 
             setText('id_brukttid', 'Prøv igjen');
 
+            getInProgress = 0;
+            
             return false;
         }
 
@@ -1081,7 +1151,10 @@ var now = new Date();
 
 }
 
+var lastGetTime = new Date();
+
 var mytimer = (function() {
+    // 10 sek
     var basePeriod = 10000;
 
 
@@ -1089,6 +1162,7 @@ var mytimer = (function() {
     return {
       start : function(speed, id) {
         logText("Start timer, id="+id);
+        basePeriod = speed;
         mytimer.run();
       },
 
@@ -1097,12 +1171,26 @@ var mytimer = (function() {
 
         logText("Timer tick");
         
-          if (nopos === true)
+        if (nopos === true)
         {
             logText("restart pos");
             
             getOwnPosition();
         }    
+
+        // Pos watch sender pos ...
+
+        if (visAndre > 0)
+        {
+            var now = new Date();    
+            if ( now - lastGetTime > 3000)
+            {
+                // hent hvert minutt
+                getPosisjoner(ownGruppe);   
+
+                lastGetTime = new Date();
+            }    
+        }
 
         timeoutRef = setTimeout(mytimer.run, basePeriod);
       },

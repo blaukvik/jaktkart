@@ -53,6 +53,23 @@ if (!$db_selected)
 */
 
 
+/*
+  Bare ha siste posisjon:
+*/
+        $result_res = mysql_query("delete from POSISJONER where gruppe='$dpos->gruppe' and navn='$dpos->navn'");
+
+/*
+   -kan ha med symbol inn
+
+   -kan ha med tid som skal beholdes inn, feks slette alt eldre enn 10 sec, 3600 sec....
+        $result_res = mysql_query("delete from POSISJONER where gruppe='$dpos->gruppe' and navn='$dpos->navn' and 
+            (('$dpos->tid' - tid) > '$dpos->age')");
+
+
+    select * from POSISJONER where (  (UNIX_TIMESTAMP(NOW()) - (tid/1000)) > 10000);
+
+*/
+
         $result_res = mysql_query("INSERT INTO POSISJONER (gruppe, navn, tid, lat, lon)
                               VALUES ('$dpos->gruppe', '$dpos->navn', '$dpos->tid', '$dpos->lat', '$dpos->lon' )");
         if ($result_res == FALSE)

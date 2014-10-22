@@ -1,8 +1,4 @@
 <!DOCTYPE html>
-<!--
-$Id: waypoint.htm 12 2013-10-14 16:49:40Z bla $
-$Header: file:///Users/bla/Documents/svnrepo/jaktkart/waypoint.htm 12 2013-10-14 16:49:40Z bla $
--->
 <html>
 <head>
 <title>PosTracker</title>
@@ -17,6 +13,7 @@ $Header: file:///Users/bla/Documents/svnrepo/jaktkart/waypoint.htm 12 2013-10-14
 
 
 <script type="text/javascript" src="Posisjon.js"></script>
+<script type="text/javascript" src="markerwithlabel.js"></script>
 <script type="text/javascript" src="jaktkart.js"></script>
 
 <link rel="stylesheet" media="screen and (min-device-width: 801px)" type="text/css" href="jakt.css" />
@@ -24,18 +21,16 @@ $Header: file:///Users/bla/Documents/svnrepo/jaktkart/waypoint.htm 12 2013-10-14
 
 <script type="text/javascript">
 
-var pos_center 	= new google.maps.LatLng(59.01007, 11.48248);
-var zoom_level = 14;
-var num_poster = 0;
+pos_center 	= new google.maps.LatLng(59.01007, 11.48248);
+zoom_level = 14;
+num_poster = 0;
 
 visEgenPos = 1;
 autoSentrer = 1;
 runTimer = 1;
-
-var sendPosUpdates = 1;
+visAndre = 1;
 
 var post_pos = [
-
 ];
                 
 // Onload handler to fire off the app.
@@ -63,10 +58,8 @@ google.maps.event.addDomListener(window, 'load', initialize);
   </div> 
   <div id="cmdPanel">
     <br>
-    <input type="button" value ="Restart" onclick="initialize_gps()" />
-    <br>
     <label for="userid">User ID :</label>
-    <input type="text" name ="userid" id="userid" onblur="PostData()" />
+    <input type="text" name ="userid" id="userid" onblur="setUserId()" />
     <div id="div1"></div>
     <input type="button" value ="Les posisjoner" onclick="onKlikkLesPosisjoner()" />
 
