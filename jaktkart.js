@@ -877,13 +877,14 @@ function SendPost() {
 
     
 }
-
+var nypostnr=1;
 function onKlikkSendNyPost()
 {
   if (ownPosition !== undefined )
   {
-        var post = new Posisjon("ny post", ownGruppe, ownPosition.lat(), ownPosition.lng());
+        var post = new Posisjon("ny"+nypostnr+ownNavn, ownGruppe, ownPosition.lat(), ownPosition.lng());
         sendNyPost(post);
+	nypostnr++;
   }	 
   else
     logText("ownPosition undef");
@@ -1199,7 +1200,7 @@ function sendNyPost(post)
     // post til server
     $.ajax({
         type: "POST",
-        url: "submitPost.php",
+        url: "submitPos.php",
         data: {json: jsonstring},
         success: function(data) 
         {
