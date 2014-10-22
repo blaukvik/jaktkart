@@ -878,6 +878,17 @@ function SendPost() {
     
 }
 
+function onKlikkSendNyPost()
+{
+  if (ownPosition !== undefined )
+  {
+        var post = new Posisjon("ny post", ownGruppe, ownPosition.lat(), ownPosition.lng());
+        sendNyPost(post);
+  }	 
+  else
+    logText("ownPosition undef");
+}
+
 function onKlikkSendOwnPos()
 {
   if (ownPosition !== undefined )
@@ -1179,3 +1190,49 @@ var mytimer = (function() {
     }
 
 }());
+
+function sendNyPost(post) 
+{
+    var jsonstring = JSON.stringify(post, replacer);
+    logText("jsonstring=" + jsonstring);
+
+    // post til server
+    $.ajax({
+        type: "POST",
+        url: "submitPost.php",
+        data: {json: jsonstring},
+        success: function(data) 
+        {
+            logText('succ:' + data.message);
+
+            return true;
+        },
+        complete: function() 
+        {
+            logText('complete:');
+        },
+        error: function(x, textStatus, errorThrown) 
+        {
+            logText('ajax err:' + x.status + ', st=' + textStatus + ", t=" + errorThrown);
+
+            if (x.status === 0) {
+                logText('Offline ? !\n Sjekk nett.');
+            } else if (x.status === 404) {
+                logText('Requested URL not found.');
+            } else if (x.status === 500) {
+                logText('Internel Server Error.');
+            } else if (textStatus === 'parsererror') {
+                logText('Error.\nParsing JSON Request failed.');
+            } else if (textStatus === 'timeout') {
+                logText('Request Time out.');
+            } else {
+                logText('Unknow Error.\n' + x.responseText);
+            }
+
+            return false;
+        }
+
+
+    });
+
+}
