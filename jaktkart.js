@@ -16,12 +16,23 @@ var own_circle;
 var ownPosition;
 var ownAccuracy;
 var visEgenPos;
+
 var visAndre;
-var getInterval = 10000;
+// hvor ofte skal vi lese andres plasser
+var getInterval = (30*1000);
+// hva er max alder for å tegne posisjoner
 //var aldersgrense = (1000 * 60 * 60 * 24);
 var aldersgrense = (1000 * 60 * 60 * 4);
+
 var autoSentrer;
+
 var runTimer;
+/* hvor ofte timer kjører
+ * 
+ * timer restarter geopos hvis det ikke er pos
+ */
+var timerInterval = 10000;
+
 var ownNavn;
 var ownGruppe;
 var posliste;
@@ -642,7 +653,7 @@ function getOwnPosition() {
 function initialize() {
 
 	setText('gpsStatus', "start init");
-
+        
 	setText('svar', "Fjerner personer etter " + aldersgrense/(3600*1000) + " timer");
 
 	ownNavn = localStorage.getItem("jaktNavn");
@@ -790,7 +801,7 @@ else
     {
         logText("runtimer, starter timer");
        
-        mytimer.start(10000, 'timer') ;
+        mytimer.start(timerInterval, 'timer') ;
     }
     else
     {
@@ -977,16 +988,6 @@ function replacer(key, value)
 
 function onKlikkLesPosisjoner()
 {
-    /* fjern gamle markører */
-//    for (n = 1; n <= num_poster; n++)
-//    {
-//        marker_post[n - 1].setMap(null);
-//    }
-//    num_poster = 0;
-
-    
-
-
     logText("henter posisjoner");
     getPosisjoner(ownGruppe);
     
@@ -1073,6 +1074,12 @@ if (navn==ownNavn)
                 if (navn === undefined)
                     navn = "ukjent";
                 
+                var icon = "red.png";
+                
+                if (navn.substr(0,2) == "ny")
+		{
+		  icon="green.png";
+		}
 
                 var p = new google.maps.LatLng(data.pos[n].lat, data.pos[n].lon);
                 //var p = new google.maps.LatLng(data.pos[n].lon, data.pos[n].lat);  // bug i firefox ??
@@ -1083,7 +1090,7 @@ if (navn==ownNavn)
                     var m = new MarkerWithLabel({
                         position: p,
                         map:map,
-                        icon: "red.png",                        
+                        icon: icon,                        
                         title : "" + navn + ' kl ' + tidstr,
 			labelAnchor: new google.maps.Point(20,50),
 			labelClass: "plabel",
@@ -1144,7 +1151,10 @@ if (navn==ownNavn)
 
 }
 
-var lastGetTime = new Date();
+// ikke hent første gang 
+//var lastGetTime = new Date() ;
+// hent første gang
+var lastGetTime = new Date(0);
 
 var mytimer = (function() {
     // 10 sek
@@ -1237,3 +1247,37 @@ function sendNyPost(post)
     });
 
 }
+
+/*
+ * 
+ * denne "virker" men gir størrelses endring
+ * event på orientationchange:
+ * 
+$(document).ready(function () {
+     $(window)    
+          .bind('orientationchange', function(){
+               if (window.orientation % 180 == 0){
+                   $(document.body).css("-webkit-transform-origin", "")
+                       .css("-webkit-transform", "");               
+               } 
+               else {                   
+                   if ( window.orientation > 0) { //clockwise
+                     $(document.body).css("-webkit-transform-origin", "200px 190px")
+                       .css("-webkit-transform",  "rotate(-90deg)");  
+                   }
+                   else {
+                     $(document.body).css("-webkit-transform-origin", "280px 190px")
+                       .css("-webkit-transform",  "rotate(90deg)"); 
+                   }
+               }
+           })
+          .trigger('orientationchange'); 
+});
+
+ingen effekt 
+@viewport all and (max-width: 480px) {
+ orientation:portrait;
+}
+
+
+*/
