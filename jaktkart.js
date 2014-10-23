@@ -1060,7 +1060,8 @@ if (navn==ownNavn)
 		  var ptime=new Date(data.pos[n].tid);
 
 	          // 30 minutter
-		  if (now-ptime > aldersgrense)
+                  if ((navn.substr(0,2) != "ny") &&
+		      (now-ptime > aldersgrense))
 		  {
 		     logText("For gammel pos  " + navn + " " + ptime);
 		     continue;
